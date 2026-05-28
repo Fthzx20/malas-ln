@@ -1,5 +1,6 @@
 import { lt } from 'drizzle-orm'
 import { notifications, profiles } from '@@/server/database/schema'
+import { logger } from './logger'
 
 export type NotificationType =
   | 'comment_reply'
@@ -53,7 +54,7 @@ export async function createNotification(db: any, input: CreateNotificationInput
 
     return notification ?? null
   } catch (err) {
-    console.warn('[notifications] Failed to create notification:', err)
+    logger.warn('[notifications] Failed to create notification:', err)
     return null
   }
 }
@@ -83,7 +84,7 @@ export async function createNotificationsForUsers(db: any, inputs: CreateNotific
       }))).returning()
       allCreated.push(...created)
     } catch (err) {
-      console.warn(`[notifications] Batch insert failed (offset ${i}):`, err)
+      logger.warn(`[notifications] Batch insert failed (offset ${i}):`, err)
     }
   }
 

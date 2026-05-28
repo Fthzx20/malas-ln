@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { getR2PublicUrl, uploadToR2 } from '../../utils/r2'
 import { throwApiError } from '@@/server/utils/errors'
-import { throwApiError } from '@@/server/utils/errors'
+import { logger } from '@@/server/utils/logger'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
 const MAX_SIZE = 5 * 1024 * 1024
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
   try {
     await uploadToR2(key, file.data, contentType)
   } catch (error: any) {
-    console.error('[avatar] Upload error:', error)
+    logger.error('[avatar] Upload error:', error)
     throwApiError(500, 'Failed to upload avatar to storage')
   }
 

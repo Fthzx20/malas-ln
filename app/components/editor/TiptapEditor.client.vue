@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { clientLogger } from '~/utils/client-logger'
 import { idbGet, idbSet } from '~/utils/idb'
 import { Editor as EditorClass } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
@@ -297,7 +298,7 @@ onMounted(async () => {
 
     editorReady.value = true
   } catch (err: any) {
-    console.error('[TiptapEditor] load error', err)
+    clientLogger.error('[TiptapEditor] load error', err)
     editorError.value = String(err && (err.message || err))
   }
 })

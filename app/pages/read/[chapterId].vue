@@ -256,8 +256,8 @@ const commentsLoadingMore = ref(false)
 const commentsLoadMoreRef = ref<HTMLElement | null>(null)
 const commentsObserver = ref<IntersectionObserver | null>(null)
 
-// Dummy preview comments when no real comments exist
-const dummyComments = [
+// Dummy preview comments when no real comments exist (DEV only)
+const dummyComments = import.meta.env.DEV ? [
   {
     id: 'dummy-1',
     content: '<p>Wah, bab ini seru banget! Alurnya ngagetin.</p>',
@@ -283,7 +283,7 @@ const dummyComments = [
     replies: [],
     likedBy: []
   }
-]
+ ] : []
 
 const fetchComments = async () => {
   try {

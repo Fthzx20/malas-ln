@@ -10,6 +10,16 @@ if (!process.env.DATABASE_URL) {
   process.exit(1)
 }
 
+// Safety guard: never run seeding in production and require explicit confirmation
+if (process.env.NODE_ENV === 'production') {
+  console.error('Refusing to run seed in production environment')
+  process.exit(1)
+}
+if (process.env.CONFIRM_SEED !== 'true') {
+  console.error('Refusing to run seed: set CONFIRM_SEED=true to proceed')
+  process.exit(1)
+}
+
 const client = postgres(process.env.DATABASE_URL, { max: 1 })
 const db = drizzle(client, { schema })
 

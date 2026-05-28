@@ -3,6 +3,7 @@ import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
 import { throwApiError } from '@@/server/utils/errors'
 import { purgeOnWrite } from '@@/server/utils/purge'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   const user = await checkBanned(event)
@@ -63,7 +64,7 @@ export default defineEventHandler(async (event) => {
     try {
       await purgeOnWrite({ type: 'forum' })
     } catch (e) {
-      console.warn('Failed to purge forum cache after post creation', e)
+      logger.warn('Failed to purge forum cache after post creation', e)
     }
 
     return newPost

@@ -1,16 +1,17 @@
 import { bookmarks } from '@@/server/database/schema'
 import { throwApiError } from '@@/server/utils/errors'
+import { logger } from '@@/server/utils/logger'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  console.info('[api] bookmarks GET start')
+  logger.info('[api] bookmarks GET start')
   let user
   try {
     user = await requireAuth(event)
   } catch (_err) {
     throwApiError(401, 'Authentication required')
   }
-  console.info('[api] bookmarks GET after requireAuth')
+  logger.info('[api] bookmarks GET after requireAuth')
   const db = useDB()
 
   const query = getQuery(event)
@@ -46,7 +47,7 @@ export default defineEventHandler(async (event) => {
     orderBy: (b, { desc }) => [desc(b.updatedAt)],
   })
 
-  console.info('[api] bookmarks GET DB queries complete')
+  logger.info('[api] bookmarks GET DB queries complete')
 
   return userBookmarks
 })

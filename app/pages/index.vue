@@ -48,11 +48,11 @@ const contributorsList = computed(() => {
     if (Array.isArray(remote)) return remote
     return remote.contributors ?? remote.data ?? []
   }
-  // fallback to dummy
-  return topContributors.contributors
+  // fallback to dummy only in development
+  return import.meta.env.DEV ? topContributors.contributors : []
 })
 
-const topContributors = {
+const topContributors = import.meta.env.DEV ? {
   contributors: [
     {
       id: 'dummy-contributor-1',
@@ -85,7 +85,7 @@ const topContributors = {
       contributionCount: 18,
     },
   ],
-}
+} : { contributors: [] }
 
 const libraryStore = useLibraryStore()
 const isClientReady = ref(false)
@@ -262,6 +262,7 @@ const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery'
 
 <template>
   <div class="container-editorial py-6">
+    <HomepageNotice />
 
     <!-- ===== EDITORIAL LEAD (HERO SECTION) ===== -->
     <section 

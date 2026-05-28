@@ -3,6 +3,7 @@ import { eq, and } from 'drizzle-orm'
 import { withDB } from '@@/server/utils/db'
 import { throwApiError } from '@@/server/utils/errors'
 import { purgeOnWrite } from '@@/server/utils/purge'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   let user
@@ -45,7 +46,7 @@ export default defineEventHandler(async (event) => {
         .returning()
 
       // Best-effort purge novel cache so readers see updated bookmark counts
-      try { await purgeOnWrite({ type: 'novelById', novelId: body.novelId }) } catch (e) { console.warn('Failed to purge novel cache after bookmark update', e) }
+      try { await purgeOnWrite({ type: 'novelById', novelId: body.novelId }) } catch (e) { logger.warn('Failed to purge novel cache after bookmark update', e) }
       return updated
     }
 
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
       })
       .returning()
 
-    try { await purgeOnWrite({ type: 'novelById', novelId: body.novelId }) } catch (e) { console.warn('Failed to purge novel cache after bookmark create', e) }
+    try { await purgeOnWrite({ type: 'novelById', novelId: body.novelId }) } catch (e) { logger.warn('Failed to purge novel cache after bookmark create', e) }
     return created
   })
 })

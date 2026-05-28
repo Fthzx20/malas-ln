@@ -3,6 +3,7 @@ import { eq, desc, sql, and, ilike, inArray, asc } from 'drizzle-orm'
 import { sanitizeSqlLike } from '@@/server/utils/auth'
 import { sanitizeSearchInput } from '@@/server/utils/validate'
 import { throwApiError } from '@@/server/utils/errors'
+import { logger } from '@@/server/utils/logger'
 
 export default defineCachedEventHandler(async (event) => {
   const db = useDB()
@@ -85,7 +86,7 @@ export default defineCachedEventHandler(async (event) => {
         .where(where),
     ])
   } catch (err: any) {
-    console.error('[novels:list] DB query failed:', err?.message || err)
+    logger.error('[novels:list] DB query failed:', err?.message || err)
     throwApiError(500, 'Internal server error')
   }
 

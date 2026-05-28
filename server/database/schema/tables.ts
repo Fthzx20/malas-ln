@@ -196,6 +196,16 @@ export const notifications = pgTable('notifications', {
 ])
 
 /* ============================================================
+   SITE NOTICE (GLOBAL HOMEPAGE POPUP)
+   ============================================================ */
+export const siteNotice = pgTable('site_notice', {
+  id: text('id').primaryKey().default('homepage-popup'),
+  message: text('message').notNull().default(''),
+  isActive: boolean('is_active').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+/* ============================================================
    FORUM
    ============================================================ */
 export const forumCategories = pgTable('forum_categories', {

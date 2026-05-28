@@ -1,5 +1,6 @@
 import { purgeNovelsCache, purgeNovelSlugCache } from './cache'
 import { withDB } from './db'
+import { logger } from './logger'
 
 type PurgeOpts = {
   type: 'novel' | 'novelById' | 'novelSlug' | 'chapter' | 'forum' | 'forumCategory'
@@ -55,7 +56,6 @@ export async function purgeOnWrite(opts: PurgeOpts): Promise<void> {
     }
   } catch (e) {
     // Non-fatal: log and continue
-    // eslint-disable-next-line no-console
-    console.warn('purgeOnWrite failed', e)
+    logger.warn('purgeOnWrite failed', e)
   }
 }

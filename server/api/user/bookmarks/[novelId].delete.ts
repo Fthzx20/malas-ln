@@ -4,6 +4,7 @@ import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
 import { throwApiError } from '@@/server/utils/errors'
 import { purgeOnWrite } from '@@/server/utils/purge'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   let user
@@ -39,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
     await db.delete(bookmarks).where(eq(bookmarks.id, existing.id))
 
-    try { await purgeOnWrite({ type: 'novelById', novelId: params.novelId }) } catch (e) { console.warn('Failed to purge novel cache after bookmark delete', e) }
+    try { await purgeOnWrite({ type: 'novelById', novelId: params.novelId }) } catch (e) { logger.warn('Failed to purge novel cache after bookmark delete', e) }
 
     return { ok: true }
   })

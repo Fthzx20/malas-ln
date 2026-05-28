@@ -1,5 +1,7 @@
 import { randomUUID } from 'crypto'
 import { throwApiError } from '@@/server/utils/errors'
+import { getR2PublicUrl, uploadToR2 } from '../../utils/r2'
+import { logger } from '@@/server/utils/logger'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event) => {
       url: publicUrl,
     }
   } catch (error: any) {
-    console.error('Upload error:', error)
+    logger.error('Upload error:', error)
     throwApiError(500, 'Failed to upload file to storage')
   }
 })

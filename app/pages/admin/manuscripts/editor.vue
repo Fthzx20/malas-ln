@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { clientLogger } from '~/utils/client-logger'
 import { useAuthStore } from '~/stores/auth'
 import { useToast } from '~/composables/useToast'
 import { useReaderStore } from '~/stores/reader'
@@ -62,7 +63,7 @@ const loadChapterDetails = async () => {
       }
     }
   } catch (err) {
-    console.error('[editor] loadChapterDetails error', err)
+    clientLogger.error('[editor] loadChapterDetails error', err)
     toast.error('Failed to load manuscript details')
   } finally {
     isLoading.value = false

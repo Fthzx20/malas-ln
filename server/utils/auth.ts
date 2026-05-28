@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { logger } from './logger'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 export type UserRole = 'user' | 'translator' | 'admin'
@@ -85,7 +86,7 @@ export async function requireAuth(event: H3Event): Promise<AuthUser> {
       const method = event.node?.req?.method || 'GET'
       const ua = event.node?.req?.headers?.['user-agent'] || ''
       const caller = (new Error().stack || '').split('\n')[2]?.trim() || ''
-      console.info(`[auth] Authentication required - ${method} ${url} - UA: ${ua} - caller: ${caller}`)
+      logger.info(`[auth] Authentication required - ${method} ${url} - UA: ${ua} - caller: ${caller}`)
     } catch {}
     throw createError({
       statusCode: 401,

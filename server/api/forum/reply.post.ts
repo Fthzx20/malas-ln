@@ -4,6 +4,7 @@ import { requireFields, validateUUID } from '@@/server/utils/validate'
 import { createNotification, createNotificationsForUsers, extractMentions, findProfilesByUsernames } from '@@/server/utils/notifications'
 import { withDB } from '@@/server/utils/db'
 import { purgeOnWrite } from '@@/server/utils/purge'
+import { logger } from '@@/server/utils/logger'
 import { throwApiError } from '@@/server/utils/errors'
 
 export default defineEventHandler(async (event) => {
@@ -99,7 +100,7 @@ export default defineEventHandler(async (event) => {
     try {
       await purgeOnWrite({ type: 'forum' })
     } catch (e) {
-      console.warn('Failed to purge forum cache after reply creation', e)
+      logger.warn('Failed to purge forum cache after reply creation', e)
     }
 
     return result

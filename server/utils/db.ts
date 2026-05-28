@@ -1,6 +1,7 @@
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from '@@/server/database/schema'
+import { logger } from './logger'
 
 let _db: PostgresJsDatabase<typeof schema> | null = null
 let _client: postgres.Sql | null = null
@@ -11,14 +12,14 @@ export function useDB(): PostgresJsDatabase<typeof schema> {
     if (!config.databaseUrl) {
       throw createError({ statusCode: 503, statusMessage: 'DATABASE_URL is not configured' })
     }
-    console.info('[db] creating postgres client')
+    logger.info('[db] creating postgres client')
     _client = postgres(config.databaseUrl, {
       prepare: false,       // Required for Supabase Transaction Pooler
       max: 3,               // Stay within free-tier connection limits
       connect_timeout: 10,  // Fail faster on new connection attempts (seconds)
       idle_timeout: 20,     // Seconds before closing idle connections
     })
-    console.info('[db] postgres client created')
+    logger.info('[db] postgres client created')
     _db = drizzle(_client, { schema })
   }
   return _db
@@ -45,11 +46,9 @@ export async function withDB<T>(
     if (ms > 200) {
       const caller = (new Error().stack || '').split('\n')[2]?.trim() || ''
       // Warn about slow DB operation so api-timing correlates with handler
-      // eslint-disable-next-line no-console
-      console.warn(`[db-timing] slow DB operation: ${ms}ms ${caller}`)
+      logger.warn(`[db-timing] slow DB operation: ${ms}ms ${caller}`)
     } else {
-      // eslint-disable-next-line no-console
-      console.info(`[db-timing] ${ms}ms`)
+      logger.info(`[db-timing] ${ms}ms`)
     }
     return result
   } catch (err: unknown) {

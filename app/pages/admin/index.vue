@@ -23,6 +23,7 @@ const overviewStats = computed(() => {
 const quickActions = [
   { label: 'Catalog new series', to: '/admin/novels', detail: 'Open content ledger and add a new publication.', icon: '📋' },
   { label: 'Review moderation queue', to: '/admin/moderation', detail: 'Triage pending reports and flagged posts.', icon: '🛡️' },
+  { label: 'Edit homepage notice', to: '/admin/notices', detail: 'Set popup text and active state for the home page.', icon: '🔔' },
   { label: 'Scheduler desk', to: '/admin/scheduler', detail: 'Manage serialization timing and publishing flow.', icon: '📅' },
   { label: 'Upload cover art', to: '/admin/uploads', detail: 'Commit assets into the R2 pipeline.', icon: '🖼️' },
 ]

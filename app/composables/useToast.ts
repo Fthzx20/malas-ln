@@ -1,4 +1,5 @@
 import { inject, provide, ref, type Ref } from 'vue'
+import { clientLogger } from '~/utils/client-logger'
 
 export interface ToastItem {
   id: string
@@ -81,7 +82,7 @@ export function useToast() {
   const clearAll = inject<() => void>('toast-clear')
 
   if (!addToast) {
-    console.warn('[useToast] Toast provider not found. Make sure useToastProvider() is called in a parent component.')
+    clientLogger.warn('[useToast] Toast provider not found. Make sure useToastProvider() is called in a parent component.')
     return {
       addToast: (_message: string, _options?: ToastOptions) => '',
       removeToast: (_id: string) => {},

@@ -5,6 +5,7 @@ import { purgeOnWrite } from '@@/server/utils/purge'
 import { createNotificationsForUsers } from '@@/server/utils/notifications'
 import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
+import { logger } from '@@/server/utils/logger'
 import { throwApiError } from '@@/server/utils/errors'
 
 export default defineEventHandler(async (event) => {
@@ -75,7 +76,7 @@ export default defineEventHandler(async (event) => {
     try {
       await purgeOnWrite({ type: 'novelById', novelId: body.novelId })
     } catch (e) {
-      console.warn('Failed to purge caches after chapter create', e)
+      logger.warn('Failed to purge caches after chapter create', e)
     }
 
     return chapter

@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { useDB } from '../utils/db'
 import { pruneNotifications } from '../utils/notifications'
+import { logger } from '../utils/logger'
 
 export default defineNitroPlugin((nitroApp) => {
   const runCleanup = async () => {
@@ -9,7 +10,7 @@ export default defineNitroPlugin((nitroApp) => {
       await db.execute(sql`SELECT 1`)
       await pruneNotifications(db)
     } catch (error) {
-      console.warn('[notification-cleanup] Cleanup skipped:', error)
+      logger.warn('[notification-cleanup] Cleanup skipped:', error)
     }
   }
 

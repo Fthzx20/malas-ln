@@ -6,6 +6,7 @@ import { throwApiError } from '@@/server/utils/errors'
 import { purgeOnWrite } from '@@/server/utils/purge'
 import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   const user = await requireRole(event, 'translator', 'admin')
@@ -93,7 +94,7 @@ export default defineEventHandler(async (event) => {
       try {
         await purgeOnWrite({ type: 'novelById', novelId: existing.novelId })
       } catch (e) {
-        console.warn('Failed to purge novel cache after chapter update', e)
+        logger.warn('Failed to purge novel cache after chapter update', e)
       }
 
       return updatedChapter

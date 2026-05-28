@@ -2,6 +2,7 @@ import { comments } from '@@/server/database/schema'
 import { createNotification, createNotificationsForUsers, extractMentions, findProfilesByUsernames } from '@@/server/utils/notifications'
 import { throwApiError } from '@@/server/utils/errors'
 import { purgeOnWrite } from '@@/server/utils/purge'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   const user = await checkBanned(event)
@@ -104,12 +105,12 @@ export default defineEventHandler(async (event) => {
       })
       if (chap?.novelId) await purgeOnWrite({ type: 'novelById', novelId: chap.novelId })
     } catch (e) {
-      console.warn('Failed to purge novel cache after comment create', e)
+      logger.warn('Failed to purge novel cache after comment create', e)
     }
 
       return commentWithUser
     } catch (err) {
-      console.error('[comments.create] Database error while creating comment', err)
+      logger.error('[comments.create] Database error while creating comment', err)
       throwApiError(503, 'Service temporarily unavailable')
     }
   })

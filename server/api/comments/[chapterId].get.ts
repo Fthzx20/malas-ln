@@ -2,6 +2,7 @@ import { comments } from '@@/server/database/schema'
 import { and, desc, eq, isNull, lt } from 'drizzle-orm'
 import { validateUUID } from '@@/server/utils/validate'
 import { throwApiError } from '@@/server/utils/errors'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   const chapterId = getRouterParam(event, 'chapterId')
@@ -52,7 +53,7 @@ export default defineEventHandler(async (event) => {
     limit: limit + 1,
     })
   } catch (err) {
-    console.error('[comments] Failed to fetch comments for chapter', chapterId, err)
+    logger.error('[comments] Failed to fetch comments for chapter', chapterId, err)
     throwApiError(503, 'Service temporarily unavailable')
   }
 

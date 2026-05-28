@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { clientLogger } from '~/utils/client-logger'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '~/composables/useToast'
 import { useAuthStore } from '~/stores/auth'
@@ -63,7 +64,7 @@ const handleCreateChapter = async () => {
     toast.success('Chapter created. Opening editor...')
     await router.push(`/admin/manuscripts/editor?chapterId=${chapter.id}`)
   } catch (err) {
-    console.error('[manuscripts/new] create chapter failed', err)
+    clientLogger.error('[manuscripts/new] create chapter failed', err)
     toast.error('Failed to create chapter')
   } finally {
     isSaving.value = false

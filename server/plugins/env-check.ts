@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { useDB } from '../utils/db'
+import { logger } from '../utils/logger'
 
 let _appReady = false
 
@@ -21,7 +22,7 @@ export default defineNitroPlugin(async (nitroApp) => {
   })
 
   if (missing.length > 0) {
-    console.error(`[env-check] Missing required environment variables: ${missing.join(', ')}`)
+    logger.error(`[env-check] Missing required environment variables: ${missing.join(', ')}`)
     // Block all API routes until fixed
     nitroApp.hooks.hook('request', (event) => {
       if (event.path.startsWith('/api/')) {
@@ -38,7 +39,7 @@ export default defineNitroPlugin(async (nitroApp) => {
   // SSL warning
   const dbUrl = config.databaseUrl as string
   if (dbUrl && !dbUrl.includes('sslmode=require') && !dbUrl.includes('ssl=true')) {
-    console.warn('[env-check] DATABASE_URL does not include SSL configuration. Recommended for production.')
+    logger.warn('[env-check] DATABASE_URL does not include SSL configuration. Recommended for production.')
   }
 
   // Connectivity check
@@ -46,13 +47,13 @@ export default defineNitroPlugin(async (nitroApp) => {
     const db = useDB()
     await db.execute(sql`SELECT 1`)
     _appReady = true
-    console.info('[env-check] Database connectivity confirmed.')
+    logger.info('[env-check] Database connectivity confirmed.')
   } catch (err) {
     const host = (() => {
       try { return new URL(config.databaseUrl as string).host } catch { return 'unknown' }
     })()
     _appReady = false
-    console.error(`[env-check] Database connectivity check failed (host: ${host}):`, err)
+    logger.error(`[env-check] Database connectivity check failed (host: ${host}):`, err)
     // Block API routes if DB connectivity fails
     nitroApp.hooks.hook('request', (event) => {
       if (event.path.startsWith('/api/')) {

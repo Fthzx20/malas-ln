@@ -2,6 +2,7 @@ import { novels } from '@@/server/database/schema'
 import { purgeNovelsCache } from '@@/server/utils/cache'
 import { purgeOnWrite } from '@@/server/utils/purge'
 import { withDB } from '@@/server/utils/db'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   const user = await requireRole(event, 'translator', 'admin')
@@ -44,7 +45,7 @@ export default defineEventHandler(async (event) => {
       await purgeOnWrite({ type: 'novel' })
     } catch (err) {
       // Log but don't fail the request on cache purge errors
-      console.warn('purgeNovelsCache failed', err)
+      logger.warn('purgeNovelsCache failed', err)
     }
 
     return novel

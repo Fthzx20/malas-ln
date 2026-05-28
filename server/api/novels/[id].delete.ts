@@ -5,6 +5,7 @@ import { purgeOnWrite } from '@@/server/utils/purge'
 import { throwApiError } from '@@/server/utils/errors'
 import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
+import { logger } from '@@/server/utils/logger'
 
 export default defineEventHandler(async (event) => {
   // Purging a whole serial catalog item is highly destructive, require admin role
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
     try {
       await purgeOnWrite({ type: 'novel' })
     } catch (err) {
-      console.warn('purgeNovelsCache failed', err)
+      logger.warn('purgeNovelsCache failed', err)
     }
 
     return {

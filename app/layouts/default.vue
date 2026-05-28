@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick } from 'vue'
+import { clientLogger } from '~/utils/client-logger'
 import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore()
@@ -112,7 +113,7 @@ const loadNotifications = async (reset = false) => {
       return
     }
     // Other errors: log but don't crash
-    console.warn('[Notifications] Failed to load:', err?.statusMessage || err?.message)
+    clientLogger.warn('[Notifications] Failed to load:', err?.statusMessage || err?.message)
   } finally {
     notificationLoading.value = false
   }

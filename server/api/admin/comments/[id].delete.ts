@@ -2,6 +2,7 @@ import { comments } from '@@/server/database/schema'
 import { eq } from 'drizzle-orm'
 import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
+import { logger } from '@@/server/utils/logger'
 import { purgeOnWrite } from '@@/server/utils/purge'
 import { throwApiError } from '@@/server/utils/errors'
 
@@ -40,7 +41,7 @@ export default defineEventHandler(async (event) => {
         if (chap?.novelId) await purgeOnWrite({ type: 'novelById', novelId: chap.novelId })
       }
     } catch (e) {
-      console.warn('Failed to purge novel cache after comment delete', e)
+      logger.warn('Failed to purge novel cache after comment delete', e)
     }
 
     return {

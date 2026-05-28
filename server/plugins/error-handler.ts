@@ -1,9 +1,11 @@
 // server/plugins/error-handler.ts
+import { logger } from '../utils/logger'
+
 export default defineNitroPlugin((nitroApp) => {
   nitroApp.hooks.hook('error', (error, { event }) => {
     const requestId = event?.context?.requestId ?? crypto.randomUUID()
     // Sanitize stack — never expose file paths or internal details to client
-    console.error(`[${requestId}] Unhandled server error:`, {
+    logger.error(`[${requestId}] Unhandled server error:`, {
       message: error.message,
       stack: error.stack?.split('\n').slice(0, 5).join('\n'),
       url: event?.path,

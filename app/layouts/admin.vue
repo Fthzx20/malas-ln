@@ -20,6 +20,7 @@ const sidebarSections = [
     title: 'Operations',
     links: [
       { label: 'Moderation', to: '/admin/moderation', icon: 'shield', exact: false },
+      { label: 'Notices', to: '/admin/notices', icon: 'bell', exact: false },
       { label: 'Users', to: '/admin/users', icon: 'users', exact: false },
       { label: 'Uploads', to: '/admin/uploads', icon: 'upload', exact: false },
     ],
@@ -50,6 +51,7 @@ const pageTitle = computed(() => {
   if (path.startsWith('/admin/manuscripts')) return 'Manuscript Intake'
   if (path.startsWith('/admin/scheduler')) return 'Release Scheduler'
   if (path.startsWith('/admin/moderation')) return 'Moderation Desk'
+  if (path.startsWith('/admin/notices')) return 'Site Notices'
   if (path.startsWith('/admin/users')) return 'Reader Registry'
   if (path.startsWith('/admin/uploads')) return 'Asset Pipeline'
   return 'Editorial Command Board'
