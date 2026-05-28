@@ -1,0 +1,74 @@
+﻿{
+    "data":  [
+                 {
+                     "id":  "50e261bd-8c4d-44b2-b5e1-88404a3adbc4",
+                     "slug":  "chronicles-of-the-abyss",
+                     "title":  "Chronicles of the Dark Abyss",
+                     "synopsis":  "Deep in the subterranean labyrinth beneath the imperial capital lies the dark abyss, a place of forbidden sorcery and forgotten gods. When a disgraced scholar is exiled to the deepest layer, he discovers a secrets that could shatter the empire.",
+                     "coverUrl":  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format\u0026fit=crop\u0026w=600\u0026h=800\u0026q=80",
+                     "author":  "Kusanagi Ryousuke",
+                     "illustrator":  "Nakamura Hina",
+                     "originalTitle":  "æ·±æ·µã®è¨é² (Shinyen no Kiroku)",
+                     "status":  "ongoing",
+                     "genreTags":  [
+                                       "Fantasy",
+                                       "Adventure",
+                                       "Mystery",
+                                       "Psychological"
+                                   ],
+                     "totalChapters":  3,
+                     "avgRating":  4.8,
+                     "ratingCount":  15,
+                     "year":  2024,
+                     "updatedAt":  "2026-05-24T12:18:54.457Z"
+                 },
+                 {
+                     "id":  "86fe62df-ca52-47ef-8d62-c07a3c3065b2",
+                     "slug":  "resonance-of-tomorrow",
+                     "title":  "Resonance of Tomorrow",
+                     "synopsis":  "In a neo-tokyo dominated by algorithmic neural networks, a sound engineer intercepts a mysterious melody that is playing synchronously in the minds of thousands of sleeping citizens. To trace its origin, she must dive deep into the outlawed cyberspace.",
+                     "coverUrl":  "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format\u0026fit=crop\u0026w=600\u0026h=800\u0026q=80",
+                     "author":  "Tachibana Yuto",
+                     "illustrator":  "Sato Ken",
+                     "originalTitle":  "ææ¥ã®å\u0085±é³´ (Ashita no Kyoumei)",
+                     "status":  "ongoing",
+                     "genreTags":  [
+                                       "Sci-Fi",
+                                       "Drama",
+                                       "Psychological"
+                                   ],
+                     "totalChapters":  2,
+                     "avgRating":  4.5,
+                     "ratingCount":  10,
+                     "year":  2025,
+                     "updatedAt":  "2026-05-24T12:18:54.457Z"
+                 },
+                 {
+                     "id":  "b5beccf9-f79a-4c28-98e3-54cd916c52bb",
+                     "slug":  "silent-summer-memories",
+                     "title":  "Our Silent Summer Memories",
+                     "synopsis":  "After leaving the countryside, Jun returns to his seaside hometown for the first time in five years. There he meets an enigmatic girl who only writes letters using a typewriter from the 1970s. A melancholic story of youth, lost dreams, and letters left unsent.",
+                     "coverUrl":  "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format\u0026fit=crop\u0026w=600\u0026h=800\u0026q=80",
+                     "author":  "Miyazaki Haruki",
+                     "illustrator":  "Shimizu Mai",
+                     "originalTitle":  "éããªå¤ã¸ã®è¿½ä¼¸ (Shizukana Natsu e no Tsuishin)",
+                     "status":  "completed",
+                     "genreTags":  [
+                                       "Romance",
+                                       "Slice of Life",
+                                       "Drama"
+                                   ],
+                     "totalChapters":  2,
+                     "avgRating":  4.2,
+                     "ratingCount":  8,
+                     "year":  2023,
+                     "updatedAt":  "2026-05-24T12:18:54.457Z"
+                 }
+             ],
+    "pagination":  {
+                       "page":  1,
+                       "limit":  20,
+                       "total":  3,
+                       "totalPages":  1
+                   }
+}
