@@ -95,7 +95,7 @@ export async function findProfilesByUsernames(db: any, usernames: string[]) {
   if (!usernames.length) return []
   const normalized = [...new Set(usernames.map(username => username.toLowerCase()))]
   return db.query.profiles.findMany({
-    where: (p, { inArray }) => inArray(p.username, normalized),
+    where: (p: any, { inArray }: any) => inArray(p.username, normalized),
     columns: { id: true, username: true, displayName: true, avatarUrl: true },
   })
 }

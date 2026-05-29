@@ -23,7 +23,7 @@ const handleSubmit = () => {
 
   isSubmitting.value = true
   setTimeout(() => {
-    toast.success('Your letter has been sent to the Editorial Board!')
+    toast.success('Your letter has been sent to the curated Board!')
     form.value = {
       name: '',
       email: '',
@@ -37,13 +37,13 @@ const handleSubmit = () => {
 useHead({
   title: 'Correspondence Desk',
   meta: [
-    { name: 'description', content: 'Send a message or manuscript hosting request to the editors at Rano LN.' }
+    { name: 'description', content: 'Send a message or manuscript hosting request to the editors at Malaz Scans.' }
   ]
 })
 </script>
 
 <template>
-  <div class="container-editorial py-8 sm:py-12 max-w-4xl">
+  <div class="container-curated py-8 sm:py-12 max-w-4xl">
     <!-- Header -->
     <div class="border-b-4 border-ink pb-4 mb-8">
       <span class="font-mono text-xs uppercase tracking-widest text-accent font-bold">Correspondence Desk</span>
@@ -51,7 +51,7 @@ useHead({
         Letters to the Editor
       </h1>
       <p class="font-mono text-xs text-ink-muted uppercase tracking-widest mt-1">
-        Inquiries, hosting requests, or editorial suggestions
+        Inquiries, hosting requests, or curated suggestions
       </p>
     </div>
 
@@ -76,7 +76,7 @@ useHead({
             <UiSelect 
               v-model="form.subject"
               :options="[
-                { label: 'General Editorial Inquiry', value: 'general' },
+                { label: 'General curated Inquiry', value: 'general' },
                 { label: 'Translator Hosting Request', value: 'translator' },
                 { label: 'Technical Report / Bug', value: 'bug' },
                 { label: 'Legal / Copyright Issues', value: 'legal' }
@@ -103,7 +103,7 @@ useHead({
         <div class="border border-ink p-5 bg-surface-raised space-y-4">
           <h4 class="font-heading text-lg font-bold uppercase border-b border-ink pb-2">Office Guidelines</h4>
           <p class="text-xs font-body text-ink-light leading-relaxed">
-            Please be precise and concise. The editorial board reviews incoming messages daily. For translation hosting requests, please provide links to past translations or translation samples.
+            Please be precise and concise. The curated board reviews incoming messages daily. For translation hosting requests, please provide links to past translations or translation samples.
           </p>
         </div>
 
@@ -111,7 +111,7 @@ useHead({
           <h4 class="font-heading text-base font-bold uppercase border-b border-ink pb-2 text-ink-light">Office Details</h4>
           <div>
             <span class="block text-ink-muted uppercase text-[9px] font-bold">Email Contact</span>
-            <span class="font-bold">editors@ranoln.org</span>
+            <span class="font-bold">editors@malazscans.com</span>
           </div>
           <div>
             <span class="block text-ink-muted uppercase text-[9px] font-bold">Operating Hours</span>

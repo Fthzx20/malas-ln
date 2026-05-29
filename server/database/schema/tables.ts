@@ -206,6 +206,19 @@ export const siteNotice = pgTable('site_notice', {
 })
 
 /* ============================================================
+   SITE SETTINGS (GLOBAL CONFIGURATION)
+   ============================================================ */
+export const siteSettings = pgTable('site_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  category: text('category').notNull(),
+  key: text('key').notNull().unique(),
+  value: text('value').notNull(), // stored as JSON string
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index('site_settings_category_idx').on(table.category),
+])
+
+/* ============================================================
    FORUM
    ============================================================ */
 export const forumCategories = pgTable('forum_categories', {

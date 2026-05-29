@@ -3,14 +3,19 @@ import { ref, onMounted, onUnmounted, computed, watch, defineAsyncComponent } fr
 import { useLibraryStore } from '~/stores/library'
 
 useHead({
-  title: 'Rano LN — Premium Light Novel Platform',
+  title: 'Malaz Scans — Premium Light Novel Platform',
   meta: [
-    { name: 'description', content: 'Explore premium Light Novels in a gorgeous, editorial newsprint-inspired interface. Curated translations, seamless typography controls, and offline reading.' }
+    { name: 'description', content: 'Explore premium Light Novels in a gorgeous, minimalist-inspired interface. Curated translations, seamless typography controls, and offline reading.' }
   ]
 })
 
-// Fetch featured novels for the auto-flip page-turner
-const { data: featuredNovels } = await useFetch('/api/novels/featured')
+// Fetch featured novels for the auto-flip page-turner without blocking first paint
+const { data: featuredNovels } = useFetch('/api/novels/featured')
+
+// Fetch public settings for homepage texts
+const { data: publicSettingsRaw } = useFetch('/api/settings/public')
+const siteSettings = computed(() => (publicSettingsRaw.value as any)?.settings)
+const hpSettings = computed(() => siteSettings.value?.homepage || {})
 
 // Preload the first featured novel's cover image to improve LCP
 const firstCover = computed(() => (featuredNovels.value as any)?.[0]?.coverUrl ?? null)
@@ -34,7 +39,6 @@ const { data: trendingNovels, refresh: refreshTrending } = useFetch('/api/novels
   lazy: true,
 })
 
-// Top contributors — lazy (server endpoint) and use dummy as fallback
 const { data: topContribData, refresh: refreshTopContrib } = useFetch('/api/profiles/top-contributor', {
   lazy: true,
 })
@@ -48,44 +52,8 @@ const contributorsList = computed(() => {
     if (Array.isArray(remote)) return remote
     return remote.contributors ?? remote.data ?? []
   }
-  // fallback to dummy only in development
-  return import.meta.env.DEV ? topContributors.contributors : []
+  return []
 })
-
-const topContributors = import.meta.env.DEV ? {
-  contributors: [
-    {
-      id: 'dummy-contributor-1',
-      username: 'translator_zero',
-      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
-      contributionCount: 42,
-    },
-    {
-      id: 'dummy-contributor-2',
-      username: 'inkreader',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
-      contributionCount: 35,
-    },
-    {
-      id: 'dummy-contributor-3',
-      username: 'papertrail',
-      avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&h=150&q=80',
-      contributionCount: 29,
-    },
-    {
-      id: 'dummy-contributor-4',
-      username: 'novelcraft',
-      avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80',
-      contributionCount: 24,
-    },
-    {
-      id: 'dummy-contributor-5',
-      username: 'gazettebyte',
-      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
-      contributionCount: 18,
-    },
-  ],
-} : { contributors: [] }
 
 const libraryStore = useLibraryStore()
 const isClientReady = ref(false)
@@ -212,15 +180,13 @@ onMounted(() => {
     startHeroTimer()
   }
 
-  // Kick off lazy client-only fetches after hydration to reduce SSR/CF work
-  try { refreshLatest() } catch (_) {}
-
   // Observe sidebar and only load non-critical widgets when they come into view
   try {
     _sidebarObserver = new IntersectionObserver((entries) => {
       if (!entries || entries.length === 0) return
-      const e = entries[0]
-      if (e.isIntersecting) {
+      const entry = entries[0] ?? null
+      if (!entry) return
+      if (entry.isIntersecting) {
         // load trending and contributors once
         try { refreshTrending() } catch (_) {}
         try { refreshTopContrib() } catch (_) {}
@@ -257,24 +223,28 @@ onUnmounted(() => {
     }
 })
 
-const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery', 'Slice of Life', 'Drama']
+const genres = computed(() => {
+  const gStr = hpSettings.value?.genres
+  if (gStr) {
+    return gStr.split(',').map((g: string) => g.trim()).filter(Boolean)
+  }
+  return ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery', 'Slice of Life', 'Drama']
+})
 </script>
 
 <template>
-  <div class="container-editorial py-6">
-    <HomepageNotice />
-
-    <!-- ===== EDITORIAL LEAD (HERO SECTION) ===== -->
+  <div class="container-curated py-6">
+    <!-- ===== curated LEAD (HERO SECTION) ===== -->
     <section 
       class="border border-ink mb-12 bg-surface hero-section mx-auto max-w-270 overflow-hidden"
       @mouseenter="isHoveringHero = true"
       @mouseleave="isHoveringHero = false"
       aria-label="Editor's Choice Featured Novels"
     >
-      <!-- Editorial Section Header -->
+      <!-- curated Section Header -->
       <div class="px-4 py-2 border-b border-ink flex items-center justify-between bg-surface-raised font-mono text-xs tracking-wider uppercase text-ink-muted">
-        <span>Editorial Board Selection</span>
-        <span>Issue No. 104 &bull; Vol. I</span>
+        <span>{{ hpSettings.heroLeft || 'Recommended by Admin' }}</span>
+        <span>{{ hpSettings.heroRight || 'Issue No. 104 &bull; Vol. I' }}</span>
       </div>
 
       <div v-if="activeHeroNovel" class="relative overflow-hidden">
@@ -310,7 +280,7 @@ const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery'
                 <span>Rating &bull; <span class="text-accent font-bold">{{ activeHeroNovel.avgRating || 'N/A' }}</span> ({{ activeHeroNovel.ratingCount }})</span>
               </div>
 
-              <!-- Content Synopsis with drop cap for editorial feel -->
+              <!-- Content Synopsis with drop cap for curated feel -->
               <p class="font-body text-sm sm:text-base text-ink-light leading-relaxed mb-6 line-clamp-4 first-letter:float-left first-letter:font-heading first-letter:text-5xl first-letter:font-black first-letter:mr-2 first-letter:text-accent first-letter:leading-none">
                 {{ activeHeroNovel.synopsis }}
               </p>
@@ -393,15 +363,13 @@ const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery'
       </div>
     </section>
 
-    <!-- ===== EDITORIAL SUBHEAD (NEWSPAPER ROW) ===== -->
+    <!-- ===== curated SUBHEAD (NEWSPAPER ROW) ===== -->
     <div class="border-y border-ink-light py-3 mb-10 flex flex-wrap items-center justify-between gap-4 font-mono text-xs uppercase tracking-widest text-ink">
       <div class="flex items-center gap-6">
-        <span><strong>Dispatch:</strong> Premium Curated Serials</span>
-        <span class="hidden md:inline text-ink-muted">|</span>
-        <span class="hidden md:inline">100% Free-Tier Architecture</span>
+        <span><strong>Reminder:</strong> Don't forget to buy the Novels when avaliable in your country</span>
       </div>
       <div class="flex items-center gap-4">
-        <span>Ambient Engine Enabled</span>
+        <span>All Contents are Machine Translated</span>
         <div class="w-2.5 h-2.5 bg-success rounded-none inline-block animate-pulse"></div>
       </div>
     </div>
@@ -411,14 +379,13 @@ const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery'
       <!-- Left & Center Columns: Latest Dispatches (Col span 8) -->
       <main class="lg:col-span-8 space-y-8">
         <div>
-          <!-- Section Heading styled like editorial division -->
-          <div class="flex items-baseline justify-between border-b-4 border-ink pb-2 mb-6">
-            <h3 class="font-heading text-2xl lg:text-3xl font-extrabold uppercase tracking-tight">
-              Latest Dispatches
-            </h3>
-            <NuxtLink to="/novels" class="font-mono text-xs uppercase tracking-wider hover:text-accent font-semibold flex items-center gap-1">
-              View Gazette
-              <span>&rarr;</span>
+          <!-- Section Heading styled like curated division -->
+          <div class="flex items-center justify-between border-b-4 border-ink pb-2 mb-6">
+            <h2 class="font-heading text-3xl font-black uppercase tracking-tight text-ink">
+              {{ hpSettings.latestTitle || 'Latest Additions' }}
+            </h2>
+            <NuxtLink to="/novels" class="font-mono text-[10px] uppercase tracking-[0.24em] font-bold text-ink-muted hover:text-accent transition-colors flex items-center gap-2 group">
+              View list <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
             </NuxtLink>
           </div>
 
@@ -554,13 +521,13 @@ const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery'
 
       <!-- Right Column: Trending Opinion & Dispatch Column (Col span 4) -->
       <aside ref="sidebarRef" class="lg:col-span-4 flex flex-col gap-6">
-        <!-- Editorial Leaderboard (Trending Column) -->
+        <!-- curated Leaderboard (Trending Column) -->
         <div class="border border-ink p-5 sm:p-6 bg-white shadow-sm">
-          <div class="border-b-4 border-ink pb-2 mb-6">
-            <h3 class="font-heading text-xl lg:text-2xl font-black uppercase tracking-tight">
-              Most Read
+          <div class="border-b-2 border-ink pb-2 mb-4 flex items-center justify-between">
+            <h3 class="font-heading text-xl font-bold uppercase tracking-tight text-ink">
+              {{ hpSettings.trendingTitle || 'Trending Serials' }}
             </h3>
-            <p class="font-mono text-[10px] text-ink-muted uppercase mt-0.5">Top Serials This Week</p>
+            <span class="font-mono text-[9px] text-ink-muted tracking-[0.2em] uppercase">Metrics Engine</span>
           </div>
 
           <div v-if="trendingNovels?.data?.length" class="space-y-6">
@@ -625,10 +592,10 @@ const genres = ['Action', 'Fantasy', 'Adventure', 'Sci-Fi', 'Romance', 'Mystery'
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between gap-3">
                   <p class="truncate font-heading text-sm font-bold text-ink">{{ contributor.username }}</p>
-                  <span class="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-accent">#{{ index + 1 }}</span>
+                  <span class="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-accent">#{{ Number(index) + 1 }}</span>
                 </div>
                 <p class="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-ink-muted">
-                  {{ contributor.contributionCount }} contributions this week
+                  {{ Number(contributor.contributionCount || 0) }} contributions this week
                 </p>
               </div>
             </div>

@@ -222,20 +222,20 @@ watch(fetchParams, () => {
 useHead({
   title: 'Browse Serials',
   meta: [
-    { name: 'description', content: 'Search and filter the complete archive of premium light novels on Rano LN.' }
+    { name: 'description', content: 'Search and filter the complete archive of premium light novels on Malaz Scans.' }
   ]
 })
 </script>
 
 <template>
-  <div class="container-editorial py-8">
+  <div class="container-curated py-8">
     <!-- ===== PAGE TITLE ===== -->
     <div class="border-b-4 border-ink pb-4 mb-8">
       <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight">
-        The Archive Gazette
+        Bookshelf
       </h2>
       <p class="font-mono text-xs text-ink-muted uppercase tracking-widest mt-1">
-        Browse, filter, and discover cataloged manuscripts &middot; {{ novelsData?.pagination?.total || 0 }} Entries Found
+        Browse, filter, and discover cataloged chapters &middot; {{ novelsData?.pagination?.total || 0 }} Entries Found
       </p>
     </div>
 
@@ -318,7 +318,7 @@ useHead({
                       type="checkbox"
                       :checked="searchStore.filters.genre.includes(genre)"
                       @change="searchStore.toggleGenre(genre)"
-                      class="w-4 h-4 border-ink accent-[--color-accent] cursor-pointer flex-shrink-0"
+                      class="w-4 h-4 border-ink accent-[--color-accent] cursor-pointer shrink-0"
                     />
                     <span class="select-none">{{ genre }}</span>
                   </label>
@@ -373,7 +373,7 @@ useHead({
         <div class="hidden lg:block border border-ink bg-paper p-5 space-y-5 sticky top-24">
           <div class="flex items-center justify-between border-b border-ink pb-2">
             <h3 class="font-heading text-lg font-black uppercase tracking-tight text-ink">
-              Saringan
+              Filter
             </h3>
             <button
               v-if="searchStore.hasActiveFilters || searchStore.query"
@@ -408,7 +408,7 @@ useHead({
                   type="checkbox"
                   :checked="searchStore.filters.genre.includes(genre)"
                   @change="searchStore.toggleGenre(genre)"
-                  class="w-4 h-4 border-ink accent-[--color-accent] cursor-pointer flex-shrink-0"
+                  class="w-4 h-4 border-ink accent-[--color-accent] cursor-pointer shrink-0"
                 />
                 <span class="select-none">{{ genre }}</span>
               </label>
@@ -560,7 +560,7 @@ useHead({
                     <UiBookmarkButton :novel-id="novel.id" size="sm" :icon-only="true" />
                   </div>
                   <NuxtLink :to="`/novels/${novel.slug}`" class="block">
-                    <h4 class="font-heading text-base sm:text-lg font-bold leading-snug line-clamp-2 hover:text-accent transition-colors mt-0.5">
+                    <h4 class="font-heading text-sm sm:text-base lg:text-lg font-bold leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis hover:text-accent transition-colors mt-0.5">
                       {{ novel.title }}
                     </h4>
                   </NuxtLink>
@@ -595,21 +595,26 @@ useHead({
         </div>
 
         <!-- No data found fallback -->
-        <div v-else class="border border-dashed border-rule p-12 text-center bg-paper">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto text-ink-faint mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="square" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h4 class="font-heading text-lg font-bold mb-2">No Records Found</h4>
-          <p class="text-sm text-ink-muted max-w-md mx-auto mb-6">
-            We couldn't find any light novels matching your query or filter configurations. Please refine your search.
-          </p>
-          <button
-            type="button"
-            @click="resetFilters"
-            class="px-5 py-2.5 bg-ink text-paper hover:bg-accent font-ui text-sm font-semibold transition-colors"
-          >
-            Clear All Filters
-          </button>
+        <div v-else class="border border-dashed border-rule bg-paper w-full max-w-5xl mx-auto p-6 sm:p-8 lg:p-10 text-center">
+          <div class="space-y-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 mx-auto text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="square" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+
+            <div class="space-y-4">
+              <h4 class="font-heading text-xl sm:text-2xl font-black leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-full mx-auto">No Records Found</h4>
+              <p class="text-sm sm:text-base text-ink-muted max-w-4xl mx-auto leading-relaxed sm:leading-8 tracking-normal">
+                We couldn't find any light novels matching your query or filter configurations. Please refine your search.
+              </p>
+              <button
+                type="button"
+                @click="resetFilters"
+                class="px-5 py-2.5 bg-ink text-paper hover:bg-accent font-ui text-sm font-semibold transition-colors min-h-11 mx-auto"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Pagination -->

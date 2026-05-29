@@ -25,7 +25,7 @@ const roles = [
 ]
 
 // Fetch profiles with reactive query params
-const { data: profilesResponse, pending, error, refresh } = await useFetch('/api/profiles', {
+const { data: profilesResponse, pending, error, refresh } = useFetch('/api/profiles', {
   query: {
     search: searchQuery,
     role: selectedRole,
@@ -98,7 +98,7 @@ watch([searchQuery, selectedRole], () => {
 })
 
 useHead({
-  title: 'Reader Registry Desk'
+  title: 'Users'
 })
 </script>
 
@@ -110,10 +110,10 @@ useHead({
         <div>
           <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">Operations</p>
           <h2 class="font-heading text-2xl sm:text-3xl font-black uppercase tracking-tight">
-            Reader Registry
+            Users
           </h2>
           <p class="font-mono text-[10px] text-ink-muted uppercase tracking-wider mt-0.5">
-            Staff &amp; Readers &bull; System Role Ledgers
+            Users and staff
           </p>
         </div>
 
@@ -133,7 +133,7 @@ useHead({
       </div>
     </div>
 
-    <!-- ===== USER LEDGER TABLE ===== -->
+    <!-- ===== USER list TABLE ===== -->
     <UiCard padded>
       <div class="overflow-x-auto">
         <table class="w-full text-left font-mono text-xs border-collapse">
@@ -159,16 +159,16 @@ useHead({
             <!-- Error or No users state -->
             <tr v-else-if="error || !users.length">
               <td colspan="6" class="p-12 text-center">
-                <div class="space-y-3 max-w-md mx-auto">
+                <div class="space-y-3 max-w-md mx-auto w-full">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="square" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <p class="font-heading text-base font-bold text-ink">
-                    {{ error ? 'User registry failed to load' : 'No matches found' }}
+                    {{ error ? 'Failed to load users' : 'No matches found' }}
                   </p>
                   <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-muted leading-relaxed">
                     {{ error 
-                      ? 'The /api/profiles endpoint encountered an unexpected server error. Verify your administrator permission.' 
+                      ? 'The /api/profiles endpoint returned an error. Check your admin access.' 
                       : 'No profiles match your active search and role criteria.' 
                     }}
                   </p>
@@ -186,7 +186,7 @@ useHead({
             >
               <td class="p-3">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-surface-sunken border border-rule flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div class="w-8 h-8 bg-surface-sunken border border-rule flex items-center justify-center overflow-hidden shrink-0">
                     <NuxtImg
                       v-if="user.avatarUrl"
                       :src="user.avatarUrl"
@@ -224,7 +224,7 @@ useHead({
                   @click="openModModal(user)"
                   class="px-2.5 py-1 border border-ink hover:bg-ink hover:text-paper font-bold uppercase text-[9px]"
                 >
-                  Moderate
+                  Manage
                 </button>
               </td>
             </tr>

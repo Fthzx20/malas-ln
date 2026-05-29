@@ -23,8 +23,9 @@ export async function purgeOnWrite(opts: PurgeOpts): Promise<void> {
     if (opts.type === 'novelById' && opts.novelId) {
       // Lookup slug from DB then purge slug cache
       await withDB(async (db) => {
+        const nid = opts.novelId as string
         const novel = await db.query.novels.findFirst({
-          where: (n, { eq }) => eq(n.id, opts.novelId),
+          where: (n, { eq }) => eq(n.id, nid),
           columns: { slug: true },
         })
         if (novel?.slug) {

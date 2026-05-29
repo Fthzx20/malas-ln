@@ -23,14 +23,16 @@ export default defineEventHandler(async (event) => {
     throwApiError(400, 'novelId required')
   }
 
-  validateUUID(params.novelId, 'novelId')
+  const novelId = params.novelId as string
+  validateUUID(novelId, 'novelId')
 
   return await withDB(async (db) => {
     // Find existing bookmark
+    const profileId = user.profileId as string
     const existing = await db.query.bookmarks.findFirst({
       where: (b, { eq, and }) => and(
-        eq(b.userId, user.profileId),
-        eq(b.novelId, params.novelId),
+        eq(b.userId, profileId),
+        eq(b.novelId, novelId),
       ),
     })
 
@@ -40,7 +42,7 @@ export default defineEventHandler(async (event) => {
 
     await db.delete(bookmarks).where(eq(bookmarks.id, existing.id))
 
-    try { await purgeOnWrite({ type: 'novelById', novelId: params.novelId }) } catch (e) { logger.warn('Failed to purge novel cache after bookmark delete', e) }
+    try { await purgeOnWrite({ type: 'novelById', novelId: novelId }) } catch (e) { logger.warn('Failed to purge novel cache after bookmark delete', e) }
 
     return { ok: true }
   })

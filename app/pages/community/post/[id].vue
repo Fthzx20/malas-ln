@@ -63,7 +63,7 @@ useHead(() => {
 </script>
 
 <template>
-  <div class="container-editorial py-8 font-ui">
+  <div class="container-curated py-8 font-ui">
     <div v-if="pending" class="space-y-4">
       <UiSkeleton class="h-10 w-2/3" />
       <UiSkeleton class="h-32 w-full" />
@@ -131,7 +131,7 @@ useHead(() => {
             class="border border-rule bg-surface p-4 sm:p-5 flex gap-4"
           >
             <!-- Replier Avatar -->
-            <component :is="AsyncAvatar" :src="reply.user.avatarUrl || ''" :name="reply.user.displayName" size="md" class="border border-rule flex-shrink-0" />
+            <component :is="AsyncAvatar" :src="reply.user.avatarUrl || ''" :name="reply.user.displayName" size="md" class="border border-rule shrink-0" />
 
             <div class="flex-1 space-y-2">
               <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-1.5 text-xs font-mono text-ink-muted">

@@ -53,7 +53,14 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchProfile(accessToken?: string) {
       if (this.isLoading) {
-        return this.profile
+        const deadline = Date.now() + 3000
+        while (this.isLoading && Date.now() < deadline) {
+          await new Promise(resolve => setTimeout(resolve, 75))
+        }
+
+        if (this.profile) {
+          return this.profile
+        }
       }
 
       this.isLoading = true
@@ -62,21 +69,23 @@ export const useAuthStore = defineStore('auth', {
         // If there is no auth header available, avoid calling the protected endpoint
         if (!headers || Object.keys(headers).length === 0) {
           this.profile = null
-          throw createError({ statusCode: 401, statusMessage: 'Authentication required' })
+          return null
         }
 
         const data = await $fetch('/api/user/profile', {
           headers,
+          credentials: 'include',
         })
+        if ((data as any)?.authenticated === false) {
+          this.profile = null
+          return null
+        }
         this.profile = data as UserProfile
         return this.profile
       } catch (error) {
         if (isAuthError(error)) {
           this.profile = null
-          throw createError({
-            statusCode: getErrorStatusCode(error) || 401,
-            statusMessage: 'Authentication required',
-          })
+          return null
         }
 
         throw error
@@ -103,6 +112,7 @@ export const useAuthStore = defineStore('auth', {
         method: 'PUT',
         body: updates,
         headers: await this.getAuthHeaders(accessToken),
+        credentials: 'include',
       })
       this.profile = data as UserProfile
       return this.profile

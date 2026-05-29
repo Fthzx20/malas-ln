@@ -9,6 +9,7 @@ const route = useRoute()
 const isMobileMenuOpen = ref(false)
 const isSearchOpen = ref(false)
 const isNotificationsOpen = ref(false)
+const isUserMenuOpen = ref(false)
 const searchQuery = ref('')
 const notificationItems = ref<any[]>([])
 const notificationCursor = ref<string | null>(null)
@@ -34,6 +35,7 @@ const closeAll = () => {
   closeMobileMenu()
   isSearchOpen.value = false
   isNotificationsOpen.value = false
+  isUserMenuOpen.value = false
 }
 
 const stopNotificationPoller = () => {
@@ -244,23 +246,23 @@ const toggleMobileMenu = () => {
     <!-- ===== TOP BAR ===== -->
     <header class="border-b border-rule bg-paper sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <!-- Masthead -->
-      <div class="container-editorial relative">
+      <div class="container-curated relative">
         <!-- Date line -->
         <div class="flex items-center justify-between py-1.5 border-b border-rule text-xs font-mono text-ink-muted tracking-wide">
           <client-only>
             <span>{{ new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
           </client-only>
-          <span class="hidden sm:inline">Light Novel Platform</span>
+          <span class="hidden sm:inline">Fans Translation</span>
         </div>
 
         <!-- Logo & Title -->
-        <div class="py-3 sm:py-4 text-center border-b-4 border-ink">
+        <div class="py-3 sm:py-4 text-center border-b-4 border-ink shrink-0">
           <NuxtLink to="/" class="inline-block group">
             <h1 class="font-heading text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-none">
-              RANO<span class="text-accent">LN</span>
+              MALAZ<span class="text-accent">LN</span>
             </h1>
-            <p class="font-mono text-[10px] sm:text-xs tracking-[0.3em] text-ink-muted uppercase mt-0.5">
-              The Literary Newsroom
+            <p class="font-mono text-[10px] sm:text-xs tracking-[0.3em] text-ink-muted uppercase mt-0.5 whitespace-nowrap">
+              Fans Translation
             </p>
           </NuxtLink>
         </div>
@@ -281,10 +283,10 @@ const toggleMobileMenu = () => {
           </ul>
 
           <!-- Mobile: spacer so buttons are on the right -->
-          <div class="md:hidden flex-1"></div>
+          <div class="md:hidden flex-1 min-w-0"></div>
 
           <!-- Right side actions -->
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1 shrink-0">
             <!-- Search Toggle -->
             <button
               class="nav-icon-btn hover:text-accent transition-colors"
@@ -326,17 +328,21 @@ const toggleMobileMenu = () => {
                   <NuxtLink
                     v-if="authStore.isAdmin"
                     to="/admin"
-                    class="nav-icon-btn inline-flex items-center justify-center px-3 py-2 text-ink transition-colors hover:bg-surface-raised hover:text-accent"
+                    class="nav-icon-btn inline-flex h-10 items-center justify-center px-3 text-ink transition-colors hover:bg-surface-raised hover:text-accent"
                     aria-label="Open admin dashboard"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="square" d="M4 5h16v14H4zM4 9h16M9 9v10M15 9v10" />
                     </svg>
                   </NuxtLink>
-                  <div class="group relative">
-                    <NuxtLink
-                      to="/profile"
-                      class="inline-flex items-center gap-2 px-3 py-2 border border-rule bg-paper transition-colors hover:border-ink hover:bg-surface-raised"
+                  <div class="relative">
+                    <button
+                      type="button"
+                      class="inline-flex h-10 items-center gap-2 px-3 border bg-paper transition-colors"
+                      :class="isUserMenuOpen ? 'border-ink bg-surface-raised' : 'border-rule hover:border-ink hover:bg-surface-raised'"
+                      @click="isUserMenuOpen = !isUserMenuOpen"
+                      :aria-expanded="isUserMenuOpen"
+                      aria-haspopup="true"
                     >
                       <UiAvatar
                         :src="authStore.avatarUrl || ''"
@@ -344,19 +350,23 @@ const toggleMobileMenu = () => {
                         size="sm"
                       />
                       <span class="text-sm font-ui font-medium max-w-28 truncate">{{ authStore.displayName }}</span>
-                    </NuxtLink>
+                    </button>
 
-                    <div class="absolute right-0 top-full z-40 pt-2 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100">
-                      <div class="min-w-48 border border-rule bg-paper shadow-lg">
+                    <div 
+                      v-if="isUserMenuOpen"
+                      class="absolute right-0 top-full z-40 pt-2"
+                    >
+                      <div class="min-w-48 border border-rule bg-paper shadow-lg flex flex-col">
                         <NuxtLink
                           to="/profile"
-                          class="flex items-center justify-between px-4 py-3 text-sm font-ui border-b border-rule hover:bg-surface-raised"
+                          class="flex min-h-11 items-center justify-between px-4 py-3 text-sm font-ui border-b border-rule hover:bg-surface-raised"
+                          @click="isUserMenuOpen = false"
                         >
                           <span>Profile Settings</span>
                           <span class="text-xs text-ink-muted">Open</span>
                         </NuxtLink>
                         <button
-                          class="flex w-full items-center justify-between px-4 py-3 text-sm font-ui text-accent hover:bg-surface-raised"
+                          class="flex min-h-11 w-full items-center justify-between px-4 py-3 text-sm font-ui text-accent hover:bg-surface-raised"
                           @click="handleSignOut"
                         >
                           <span>Sign Out</span>
@@ -462,7 +472,7 @@ const toggleMobileMenu = () => {
                       <p class="font-ui text-xs text-ink-muted mt-1 leading-snug">{{ item.body }}</p>
                       <p class="font-mono text-[10px] text-ink-muted mt-1.5">{{ new Date(item.createdAt).toLocaleString() }}</p>
                     </div>
-                    <span v-if="!item.isRead" class="mt-1 w-2 h-2 bg-accent flex-shrink-0"></span>
+                    <span v-if="!item.isRead" class="mt-1 h-2 w-2 shrink-0 bg-accent"></span>
                   </div>
                 </button>
 
@@ -494,7 +504,7 @@ const toggleMobileMenu = () => {
       <!-- Search Bar (Expandable) -->
       <Transition name="slide-down">
         <div v-if="isSearchOpen" class="border-t border-rule bg-surface">
-          <div class="container-editorial py-3">
+          <div class="container-curated py-3">
             <form @submit.prevent="handleSearch" class="flex gap-2">
               <input
                 v-model="searchQuery"
@@ -517,14 +527,13 @@ const toggleMobileMenu = () => {
       <!-- Mobile Menu -->
       <Transition name="slide-down">
         <div v-if="isMobileMenuOpen" class="md:hidden border-t border-rule bg-paper">
-          <nav class="container-editorial py-4" aria-label="Mobile navigation">
+          <nav class="container-curated py-4" aria-label="Mobile navigation">
             <ul class="space-y-0">
               <li v-for="link in navLinks" :key="link.to" class="border-b border-rule last:border-b-0">
                 <NuxtLink
                   :to="link.to"
-                  class="block py-3.5 px-2 font-ui text-sm font-medium uppercase tracking-wider hover:text-accent transition-colors min-h-[48px] flex items-center"
+                  class="flex min-h-12 items-center px-2 py-3.5 font-ui text-sm font-medium uppercase tracking-wider hover:text-accent transition-colors"
                   :class="(link.to === '/' ? route.path === '/' : route.path.startsWith(link.to)) ? 'text-accent' : 'text-ink'"
-                  @click="closeMobileMenu"
                 >
                   {{ link.label }}
                 </NuxtLink>
@@ -541,10 +550,19 @@ const toggleMobileMenu = () => {
                       <p class="text-xs text-accent font-mono uppercase tracking-wider">{{ authStore.userRole }}</p>
                     </div>
                   </div>
-                  <div class="space-y-1">
-                    <NuxtLink to="/profile" class="block py-2.5 px-2 text-sm hover:text-accent transition-colors min-h-[44px] flex items-center" @click="closeMobileMenu">Profile Settings</NuxtLink>
-                    <NuxtLink v-if="authStore.isAdmin" to="/admin" class="block py-2.5 px-2 text-sm hover:text-accent transition-colors min-h-[44px] flex items-center" @click="closeMobileMenu">Admin Dashboard</NuxtLink>
-                    <button class="w-full text-left py-2.5 px-2 text-sm text-accent hover:text-accent-dark transition-colors min-h-[44px] flex items-center" @click="handleSignOut">Sign Out</button>
+                  <div class="space-y-1.5">
+                    <NuxtLink to="/profile" class="flex min-h-11 items-center justify-between px-3 py-2.5 text-sm hover:text-accent transition-colors">
+                      <span>Profile Settings</span>
+                      <span class="text-xs text-ink-muted">Open</span>
+                    </NuxtLink>
+                    <NuxtLink v-if="authStore.isAdmin" to="/admin" class="flex min-h-11 items-center justify-between px-3 py-2.5 text-sm hover:text-accent transition-colors">
+                      <span>Admin Dashboard</span>
+                      <span class="text-xs text-ink-muted">Go</span>
+                    </NuxtLink>
+                    <button class="flex min-h-11 w-full items-center justify-between px-3 py-2.5 text-sm text-accent hover:bg-surface-raised transition-colors" @click="handleSignOut">
+                      <span>Sign Out</span>
+                      <span class="text-xs">Exit</span>
+                    </button>
                   </div>
                 </template>
                 <template v-else>
@@ -552,14 +570,12 @@ const toggleMobileMenu = () => {
                     <NuxtLink
                       to="/auth/login"
                       class="flex-1 text-center py-3 border border-ink bg-surface text-ink font-ui font-semibold text-sm hover:bg-ink hover:text-paper transition-colors flex items-center justify-center"
-                      @click="closeMobileMenu"
                     >
                       Login
                     </NuxtLink>
                     <NuxtLink
                       to="/auth/register"
                       class="flex-1 text-center py-3 bg-accent text-white font-ui font-semibold text-sm hover:bg-accent-dark transition-colors flex items-center justify-center"
-                      @click="closeMobileMenu"
                     >
                       Register
                     </NuxtLink>
@@ -571,14 +587,12 @@ const toggleMobileMenu = () => {
                     <NuxtLink
                       to="/auth/login"
                       class="flex-1 text-center py-3 border border-ink bg-surface text-ink font-ui font-semibold text-sm hover:bg-ink hover:text-paper transition-colors flex items-center justify-center"
-                      @click="closeMobileMenu"
                     >
                       Login
                     </NuxtLink>
                     <NuxtLink
                       to="/auth/register"
                       class="flex-1 text-center py-3 bg-accent text-white font-ui font-semibold text-sm hover:bg-accent-dark transition-colors flex items-center justify-center"
-                      @click="closeMobileMenu"
                     >
                       Register
                     </NuxtLink>
@@ -598,13 +612,13 @@ const toggleMobileMenu = () => {
 
     <!-- ===== FOOTER ===== -->
     <footer class="border-t-4 border-ink mt-auto">
-      <div class="container-editorial py-8 sm:py-12">
+      <div class="container-curated py-8 sm:py-12">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <!-- Brand -->
           <div>
-            <h2 class="font-heading text-2xl font-black mb-2">RANO<span class="text-accent">LN</span></h2>
+            <h2 class="font-heading text-2xl font-black mb-2">MALAZ<span class="text-accent">LN</span></h2>
             <p class="text-sm text-ink-muted leading-relaxed">
-              A premium light novel reading platform. Built for readers, translators, and literary communities.
+              A Light Novel fans translation platform dedicated to bringing you the latest and greatest titles. Browse, read, and connect with fellow fans in our vibrant community.
             </p>
           </div>
 
@@ -641,10 +655,10 @@ const toggleMobileMenu = () => {
 
         <div class="mt-8 pt-4 border-t border-rule flex flex-col sm:flex-row items-center justify-between gap-2">
           <p class="text-xs text-ink-muted font-mono">
-            &copy; {{ new Date().getFullYear() }} Rano LN. All rights reserved.
+            &copy; {{ new Date().getFullYear() }} Malaz Scans. All rights reserved.
           </p>
           <p class="text-xs text-ink-faint font-mono">
-            Built with editorial precision.
+            Built with Nuxt.JS
           </p>
         </div>
       </div>

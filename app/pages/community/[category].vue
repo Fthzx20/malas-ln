@@ -69,7 +69,7 @@ useHead(() => {
 </script>
 
 <template>
-  <div class="container-editorial py-8">
+  <div class="container-curated py-8">
     <div v-if="pending" class="space-y-4">
       <UiSkeleton class="h-12 w-1/3" />
       <UiSkeleton class="h-6 w-2/3" />
@@ -168,7 +168,7 @@ useHead(() => {
           <label class="block uppercase font-bold text-ink-muted mb-0.5">Thread Title</label>
           <UiInput 
             v-model="threadTitle" 
-            placeholder="e.g. Editorial Analysis on Lora's Typography..."
+            placeholder="e.g. curated Analysis on Lora's Typography..."
             required
             class="w-full"
           />

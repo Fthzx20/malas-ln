@@ -74,7 +74,7 @@ onMounted(() => {
   const qChapter = route.query.chapterId as string
   const qNovel = route.query.novelId as string
   if (!qChapter) {
-    const redirect = qNovel ? `/admin/manuscripts/new?novelId=${qNovel}` : '/admin/manuscripts/new'
+    const redirect = qNovel ? `/admin/chapters/new?novelId=${qNovel}` : '/admin/chapters/new'
     navigateTo(redirect)
     return
   }
@@ -185,7 +185,7 @@ useHead({
       <div class="flex flex-col gap-3 px-4 py-4 sm:px-6">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div class="min-w-0 space-y-1">
-            <NuxtLink to="/admin/manuscripts" class="font-mono text-[10px] uppercase font-bold tracking-wider text-ink-muted hover:text-accent block">&larr; Manuscripts Directory</NuxtLink>
+            <NuxtLink to="/admin/chapters" class="font-mono text-[10px] uppercase font-bold tracking-wider text-ink-muted hover:text-accent block">&larr; Chapters Directory</NuxtLink>
             <h2 class="font-heading text-2xl sm:text-3xl font-black tracking-tight truncate">
               {{ isEditing ? 'Manuscript Editor' : 'Chapter Editor' }}
             </h2>

@@ -11,10 +11,10 @@ const isLoginPage = computed(() => route.path === '/auth/login')
       <div class="text-center mb-8">
         <NuxtLink to="/" class="inline-block">
           <h1 class="font-heading text-4xl font-black tracking-tight">
-            RANO<span class="text-accent">LN</span>
+            MALAZ<span class="text-accent">LN</span>
           </h1>
           <p class="font-mono text-[10px] tracking-[0.3em] text-ink-muted uppercase mt-1">
-            The Literary Newsroom
+            Light Novel Platform
           </p>
         </NuxtLink>
       </div>

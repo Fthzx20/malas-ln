@@ -25,9 +25,10 @@ export default defineEventHandler(async (event) => {
   // Use withDB for resilience
   return await withDB(async (db) => {
     // Upsert bookmark
+    const profileId = user.profileId as string
     const existing = await db.query.bookmarks.findFirst({
       where: (b, { eq, and }) => and(
-        eq(b.userId, user.profileId),
+        eq(b.userId, profileId),
         eq(b.novelId, body.novelId),
       ),
     })
@@ -53,7 +54,7 @@ export default defineEventHandler(async (event) => {
     const [created] = await db
       .insert(bookmarks)
       .values({
-        userId: user.profileId,
+        userId: profileId,
         novelId: body.novelId,
         status: body.status || 'plan_to_read',
         currentChapterId: body.currentChapterId || null,

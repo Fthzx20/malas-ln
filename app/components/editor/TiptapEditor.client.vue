@@ -44,7 +44,7 @@ const selectedSlashIndex = ref(0)
 const slashItems = [
   { label: 'Heading 1', desc: 'Large section heading', icon: 'H1', action: (ed: any) => applyBlockFormat(ed, 'h1') },
   { label: 'Heading 2', desc: 'Medium section heading', icon: 'H2', action: (ed: any) => applyBlockFormat(ed, 'h2') },
-  { label: 'Blockquote', desc: 'Insert an editorial quote', icon: '“', action: (ed: any) => applyBlockFormat(ed, 'blockquote') },
+  { label: 'Blockquote', desc: 'Insert an curated quote', icon: '“', action: (ed: any) => applyBlockFormat(ed, 'blockquote') },
   { label: 'Bullet List', desc: 'Simple bullet list', icon: '•', action: (ed: any) => applyBlockFormat(ed, 'bullet') },
   { label: 'Numbered List', desc: 'Sequential numbered list', icon: '1.', action: (ed: any) => applyBlockFormat(ed, 'number') },
   { label: 'Divider Line', desc: 'Crisp structural border rule', icon: '—', action: (ed: any) => applyBlockFormat(ed, 'rule') },
@@ -132,7 +132,7 @@ const commitImageWithCaption = () => {
   // Format as a complete semantic figure markup
   const caption = imageCaptionText.value.trim()
   const figureHtml = caption 
-    ? `<figure class="editorial-figure"><img src="${imageToCaptionUrl.value}" alt="${caption}" /><figcaption>${caption}</figcaption></figure><p></p>`
+    ? `<figure class="curated-figure"><img src="${imageToCaptionUrl.value}" alt="${caption}" /><figcaption>${caption}</figcaption></figure><p></p>`
     : `<img src="${imageToCaptionUrl.value}" alt="Illustration" />`
 
   editor.chain().focus().insertContent(figureHtml).run()
@@ -231,7 +231,7 @@ onMounted(async () => {
   try {
     let initial = props.modelValue || ''
     try {
-      const saved = await idbGet('rano-editor', 'drafts', props.storageKey)
+      const saved = await idbGet('malaz-editor', 'drafts', props.storageKey)
       if (saved && !initial) initial = saved
     } catch (e) {
       // ignore
@@ -240,7 +240,7 @@ onMounted(async () => {
     const debouncedSave = debounce(async (val: string) => {
       try {
         saveState.value = 'saving'
-        await idbSet('rano-editor', 'drafts', props.storageKey, val)
+        await idbSet('malaz-editor', 'drafts', props.storageKey, val)
         markSaved()
       } catch (err) {
         saveState.value = 'error'
@@ -259,11 +259,11 @@ onMounted(async () => {
           allowBase64: false,
         }),
         BubbleMenuExt.configure({
-          element: document.getElementById('rano-bubble-menu'),
+          element: document.getElementById('malaz-bubble-menu'),
           tippyOptions: { duration: 150 },
         }),
         Placeholder.configure({
-          placeholder: 'Type "/" to trigger editorial slash commands, or start writing your serial manuscript...',
+          placeholder: 'Type "/" to trigger curated slash commands, or start writing your serial manuscript...',
         })
       ],
       editorProps: {
@@ -399,7 +399,7 @@ const saveLabel = () => {
       <div v-else-if="!editorReady" class="m-3 rounded border border-rule bg-paper p-4">Loading editor…</div>
       
       <!-- Editor Root -->
-      <div ref="root" class="rano-rich-text rano-rich-text--editor min-h-80 select-text max-w-3xl mx-auto leading-relaxed prose prose-ink focus:outline-none" />
+      <div ref="root" class="malaz-rich-text malaz-rich-text--editor min-h-80 select-text max-w-3xl mx-auto leading-relaxed prose prose-ink focus:outline-none" />
     </div>
 
     <!-- ===== NOTION-STYLE INTERACTIVE SLASH COMMANDS MENU ===== -->
@@ -410,7 +410,7 @@ const saveLabel = () => {
         :style="{ left: `${slashMenuX}px`, top: `${slashMenuY}px` }"
       >
         <div class="px-3 py-1.5 bg-surface-raised text-ink-muted text-[9px] tracking-wider leading-none">
-          Editorial Blocks
+          curated Blocks
         </div>
         <div class="max-h-56 overflow-y-auto">
           <button
@@ -433,9 +433,9 @@ const saveLabel = () => {
       </div>
     </Teleport>
 
-    <!-- ===== FLOATING EDITORIAL BUBBLE FORMATTING MENU ===== -->
+    <!-- ===== FLOATING curated BUBBLE FORMATTING MENU ===== -->
     <div 
-      id="rano-bubble-menu" 
+      id="malaz-bubble-menu" 
       v-show="editor?.isActive"
       class="z-50 bg-ink text-paper border border-ink shadow-md flex items-center gap-0.5 overflow-hidden p-1 font-mono text-[9px] uppercase tracking-wider"
     >

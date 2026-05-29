@@ -1,27 +1,19 @@
 import { inArray, eq, and } from 'drizzle-orm'
-import { throwApiError } from '@@/server/utils/errors'
 import { notifications } from '@@/server/database/schema'
 import { withDB } from '@@/server/utils/db'
+import { getOptionalUser } from '@@/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  let user
-  try {
-    user = await requireAuth(event)
-  } catch (_err) {
-    throwApiError(401, 'Authentication required')
-  }
-  if (!user.profileId) {
-    throwApiError(401, 'Authentication required')
+  const user = await getOptionalUser(event)
+  if (!user?.profileId) {
+    return { ok: false, authenticated: false }
   }
 
   const body = await readBody(event)
 
   return await withDB(async (db) => {
     if (body.all === true) {
-      await db
-        .update(notifications)
-        .set({ isRead: true })
-        .where(eq(notifications.recipientId, user.profileId))
+      await db.update(notifications).set({ isRead: true }).where(eq(notifications.recipientId, user.profileId as string))
       return { ok: true }
     }
 
@@ -36,12 +28,9 @@ export default defineEventHandler(async (event) => {
       .set({ isRead: true })
       .where(and(
         inArray(notifications.id, ids),
-        eq(notifications.recipientId, user.profileId),
+        eq(notifications.recipientId, user.profileId as string),
       ))
 
     return { ok: true }
   })
-
 })
-
-

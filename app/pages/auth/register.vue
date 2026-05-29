@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { useAuthStore } from '~/stores/auth'
+import { ref } from 'vue'
 import { useToast } from '~/composables/useToast'
 
 definePageMeta({
@@ -14,8 +13,6 @@ const password = ref('')
 const isLoading = ref(false)
 const toast = useToast()
 const supabase = useSupabaseClient()
-const authStore = useAuthStore()
-const user = useSupabaseUser()
 const goToLogin = () => navigateTo('/auth/login')
 
 const handleRegister = async () => {
@@ -63,30 +60,8 @@ const handleRegister = async () => {
       return
     }
 
-    const accessToken = data.session?.access_token
-
-    if (data?.session) {
-      // Wait reactively for SupabaseUser to become non-null, then fetch profile
-      await new Promise<void>((resolve) => {
-        if (user.value) {
-          resolve()
-          return
-        }
-        const stop = watch(user, (u) => {
-          if (u) {
-            stop()
-            resolve()
-          }
-        })
-      })
-        await authStore.fetchProfileWithRetry(3, accessToken)
-      await authStore.fetchProfileWithRetry()
-      toast.success('Registration successful! Your account is ready.')
-      await navigateTo('/')
-    } else {
-      toast.success('Registration successful! Verification email sent.')
-      await navigateTo('/auth/confirm')
-    }
+    toast.success('Registration successful! Verification email sent.')
+    await navigateTo('/auth/confirm')
   } catch (err) {
     toast.error(err instanceof Error ? err.message : 'Registration failed')
   } finally {
@@ -95,9 +70,9 @@ const handleRegister = async () => {
 }
 
 useHead({
-  title: 'Register Gazette Account',
+  title: 'Register Account',
   meta: [
-    { name: 'description', content: 'Register for a Rano LN account.' }
+    { name: 'description', content: 'Register for a Malaz Scans account.' }
   ]
 })
 </script>
@@ -106,23 +81,23 @@ useHead({
   <div class="w-full space-y-6">
     <div class="border-b border-rule pb-3">
       <h2 class="font-heading text-xl font-bold uppercase tracking-tight text-ink">
-        Create Gazette Account
+        Create Account
       </h2>
       <p class="font-mono text-[10px] text-ink-muted uppercase">
-        Enrollment Desk
+        Registration
       </p>
     </div>
 
     <form @submit.prevent="handleRegister" class="w-full space-y-4">
       <div class="space-y-2">
         <label for="displayName" class="font-mono text-xs uppercase tracking-wider text-ink-muted block">
-          Editorial Nickname (Display Name)
+          Display Name (Display Name)
         </label>
         <UiInput 
           id="displayName"
           v-model="displayName" 
           type="text" 
-          placeholder="e.g. Fatih Novelist"
+          placeholder="e.g. Aceng Karbu"
           required
           class="w-full"
         />
@@ -136,7 +111,7 @@ useHead({
           id="username"
           v-model="username" 
           type="text" 
-          placeholder="e.g. fatih_99"
+          placeholder="e.g. john_titor99"
           required
           class="w-full"
         />

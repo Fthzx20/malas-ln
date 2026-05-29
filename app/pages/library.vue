@@ -49,7 +49,7 @@ useHead({
 </script>
 
 <template>
-  <div class="container-editorial py-8">
+  <div class="container-curated py-8">
     <!-- ===== PAGE HEADER ===== -->
     <div class="border-b-4 border-ink pb-4 mb-8 flex flex-col sm:flex-row sm:items-baseline justify-between">
       <div>
@@ -68,22 +68,28 @@ useHead({
 
     <!-- ===== GUEST FALLBACK LOGS ===== -->
     <div v-if="!authStore.isAuthenticated" class="space-y-8">
-      <div class="border border-dashed border-accent p-6 text-center bg-paper max-w-2xl mx-auto">
-        <h3 class="font-heading text-xl font-bold mb-2">Sign In to sync Library</h3>
-        <p class="text-sm text-ink-muted mb-4">
-          You are currently reading as a guest. Your bookmark progress, status folders, and evaluation records will not sync across devices.
-        </p>
-        <NuxtLink 
-          to="/auth/login" 
-          class="px-5 py-2.5 bg-ink text-paper hover:bg-accent font-ui font-semibold text-sm uppercase tracking-wider inline-block transition-colors"
-        >
-          Sign In Now
-        </NuxtLink>
+      <div class="border border-dashed border-accent bg-paper p-6 sm:p-8 w-full max-w-5xl mx-auto text-center">
+        <div class="space-y-4">
+          <p class="font-mono text-[10px] uppercase tracking-[0.32em] text-accent font-bold">Guest Library</p>
+          <h3 class="font-heading text-2xl sm:text-3xl font-black leading-tight tracking-tight max-w-3xl mx-auto">
+            Sign In to sync Library
+          </h3>
+          <p class="text-sm sm:text-base text-ink-muted max-w-4xl mx-auto leading-relaxed sm:leading-8 tracking-normal">
+            You are currently reading as a guest. Your bookmark progress, status folders, and evaluation records will not sync across devices.
+          </p>
+
+          <NuxtLink 
+            to="/auth/login" 
+            class="inline-flex items-center justify-center px-5 py-3 bg-ink text-paper hover:bg-accent font-ui font-semibold text-sm uppercase tracking-wider transition-colors min-h-11 whitespace-nowrap mx-auto"
+          >
+            Sign In Now
+          </NuxtLink>
+        </div>
       </div>
 
       <!-- Guest local reading history logs -->
-      <div class="border border-ink bg-surface p-6">
-        <h3 class="font-heading text-xl font-black border-b-2 border-ink pb-2 mb-4 uppercase tracking-tight">
+      <div class="border border-ink bg-surface p-6 sm:p-8">
+        <h3 class="font-heading text-xl font-black border-b-2 border-ink pb-2 mb-4 uppercase tracking-tight text-center sm:text-left">
           Local History Log
         </h3>
         <div v-if="libraryStore.localHistory.length > 0" class="divide-y divide-rule font-mono text-xs text-ink-muted">
@@ -130,7 +136,7 @@ useHead({
                 >
                   <div class="flex gap-4">
                     <!-- Book Cover -->
-                    <NuxtLink :to="`/novels/${entry.novel.slug}`" class="w-16 h-24 bg-surface-sunken border border-rule flex-shrink-0 overflow-hidden">
+                    <NuxtLink :to="`/novels/${entry.novel.slug}`" class="w-16 h-24 bg-surface-sunken border border-rule shrink-0 overflow-hidden">
                       <NuxtImg 
                         v-if="entry.novel.coverUrl"
                         :src="entry.novel.coverUrl"
@@ -148,7 +154,7 @@ useHead({
                           {{ entry.novel.status }}
                         </span>
                         <NuxtLink :to="`/novels/${entry.novel.slug}`" class="block group">
-                          <h4 class="font-heading text-base font-bold leading-tight line-clamp-2 group-hover:text-accent transition-colors">
+                          <h4 class="font-heading text-sm sm:text-base font-bold leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-accent transition-colors">
                             {{ entry.novel.title }}
                           </h4>
                         </NuxtLink>
@@ -187,7 +193,7 @@ useHead({
                       </NuxtLink>
                       <button 
                         @click="removeBookmark(entry.novelId)"
-                        class="px-2 py-1.5 border border-rule hover:border-ink hover:text-accent font-mono text-[10px] uppercase font-bold tracking-wider transition-colors min-h-[44px]"
+                        class="px-2 py-1.5 border border-rule hover:border-ink hover:text-accent font-mono text-[10px] uppercase font-bold tracking-wider transition-colors min-h-11"
                         title="Remove bookmark"
                       >
                         Remove
@@ -202,7 +208,7 @@ useHead({
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 mx-auto text-ink-faint mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="square" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18c1.746 0 3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                <h4 class="font-heading text-xl font-bold mb-2">Nothing cataloged here yet</h4>
+                <h4 class="font-heading text-lg sm:text-xl font-black leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-full mx-auto mb-2">Nothing cataloged here yet</h4>
                 <p class="text-sm font-mono text-ink-muted max-w-sm mx-auto mb-6">
                   You have no serials in this reading folder. Browse the gazette archive to discover and bookmark titles.
                 </p>
@@ -213,7 +219,7 @@ useHead({
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="square" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Browse Gazette Archive
+                  Browse Novels
                 </NuxtLink>
               </div>
             </div>

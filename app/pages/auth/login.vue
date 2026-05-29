@@ -13,7 +13,6 @@ const isLoading = ref(false)
 const toast = useToast()
 const supabase = useSupabaseClient()
 const authStore = useAuthStore()
-const user = useSupabaseUser()
 const route = useRoute()
 const goToRegister = () => navigateTo('/auth/register')
 
@@ -46,15 +45,11 @@ const handleLogin = async () => {
 
     const accessToken = data.session?.access_token
     if (data?.session) {
-      // Start profile fetch in background — do not block navigation on slow hydration
-      void authStore.fetchProfileWithRetry(3, accessToken).catch((err) => {
-        // If this fails due to auth, clear profile so UI stays consistent
-        try {
-          if ((err as any)?.statusCode === 401 || (err as any)?.data?.statusCode === 401) {
-            authStore.clearProfile()
-          }
-        } catch {}
-      })
+      await authStore.fetchProfileWithRetry(5, accessToken)
+
+      if (!authStore.profile) {
+        throw new Error('Login succeeded, but your account profile could not be loaded.')
+      }
 
       toast.success('Login successful')
       await navigateTo(getRedirectTarget())
@@ -69,7 +64,7 @@ const handleLogin = async () => {
 useHead({
   title: 'Login',
   meta: [
-    { name: 'description', content: 'Sign in to your Rano LN account.' }
+    { name: 'description', content: 'Sign in to your Malaz Scans account.' }
   ]
 })
 </script>
@@ -81,7 +76,7 @@ useHead({
         Reader Credentials
       </h2>
       <p class="font-mono text-[10px] text-ink-muted uppercase">
-        Authentication Desk
+        Login
       </p>
     </div>
 
@@ -127,7 +122,7 @@ useHead({
     </form>
 
     <div class="border-t border-rule pt-4 text-center font-mono text-[11px] text-ink-muted">
-      New to the newsroom? 
+      New to the platform? 
       <button @click="goToRegister" type="button" class="text-accent font-bold hover:underline cursor-pointer bg-transparent border-0 p-0">
         Register
       </button>

@@ -1,5 +1,5 @@
 const LEVELS = { debug: 0, info: 1, warn: 2, error: 3 }
-const envLevel = (process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'warn' : 'debug')).toLowerCase()
+const envLevel = (process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'warn' : 'debug')).toLowerCase() as keyof typeof LEVELS
 const MIN_LEVEL = LEVELS[envLevel] ?? 1
 
 function formatPrefix(level: string) {

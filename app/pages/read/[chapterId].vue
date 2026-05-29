@@ -240,7 +240,7 @@ useHead(() => {
   return {
     title: `Chapter ${chapterDetails.value.chapter.chapterNumber} — ${chapterDetails.value.chapter.novel.title}`,
     meta: [
-      { name: 'description', content: `Read Chapter ${chapterDetails.value.chapter.chapterNumber}: ${chapterDetails.value.chapter.title} of ${chapterDetails.value.chapter.novel.title} on Rano LN.` }
+      { name: 'description', content: `Read Chapter ${chapterDetails.value.chapter.chapterNumber}: ${chapterDetails.value.chapter.title} of ${chapterDetails.value.chapter.novel.title} on Malaz Scans.` }
     ]
   }
 })
@@ -256,35 +256,6 @@ const commentsLoadingMore = ref(false)
 const commentsLoadMoreRef = ref<HTMLElement | null>(null)
 const commentsObserver = ref<IntersectionObserver | null>(null)
 
-// Dummy preview comments when no real comments exist (DEV only)
-const dummyComments = import.meta.env.DEV ? [
-  {
-    id: 'dummy-1',
-    content: '<p>Wah, bab ini seru banget! Alurnya ngagetin.</p>',
-    createdAt: new Date().toISOString(),
-    user: { id: 'u1', displayName: 'Aria', username: 'aria', avatarUrl: null },
-    replies: [
-      {
-        id: 'dummy-1-1',
-        content: '<p>Setuju! Dialog terakhir bikin penasaran.</p>',
-        createdAt: new Date().toISOString(),
-        user: { id: 'u2', displayName: 'Bima', username: 'bima', avatarUrl: null },
-        parentId: 'dummy-1',
-        likedBy: [],
-      }
-    ],
-    likedBy: ['u2']
-  },
-  {
-    id: 'dummy-2',
-    content: '<p>Terima kasih translator! Terjemahannya halus.</p>',
-    createdAt: new Date().toISOString(),
-    user: { id: 'u3', displayName: 'Citra', username: 'citra', avatarUrl: null },
-    replies: [],
-    likedBy: []
-  }
- ] : []
-
 const fetchComments = async () => {
   try {
     const data = await $fetch<{ items: any[], nextCursor: string | null, hasMore: boolean }>(`/api/comments/${chapterId.value}`, {
@@ -294,16 +265,9 @@ const fetchComments = async () => {
     commentsCursor.value = data?.nextCursor ?? null
     commentsHasMore.value = Boolean(data?.hasMore)
     if (!comments.value || comments.value.length === 0) {
-      // In development only, show dummy preview so non-auth users can see structure
-      if (import.meta.env.DEV) {
-        comments.value = dummyComments
-        commentsHasMore.value = false
-        commentsCursor.value = null
-      } else {
-        comments.value = []
-        commentsHasMore.value = false
-        commentsCursor.value = null
-      }
+      comments.value = []
+      commentsHasMore.value = false
+      commentsCursor.value = null
     }
   } catch (err) {
     // ignore for now
@@ -495,7 +459,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
               <span class="text-ink-muted uppercase font-bold">Ambient Theme</span>
               <div class="grid grid-cols-4 gap-1.5">
                 <button 
-                  v-for="t in ['day', 'night', 'sepia', 'editorial'] as const" 
+                  v-for="t in ['day', 'night', 'sepia', 'curated'] as const" 
                   :key="t"
                   @click="readerStore.setTheme(t)"
                   class="py-2 text-center uppercase tracking-wider font-semibold border border-ink transition-all"
@@ -616,7 +580,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
         <!-- Pure HTML Chapter Body Content -->
         <section 
           ref="textContainerRef"
-          class="rano-rich-text rano-rich-text--reading text-justify select-none"
+          class="malaz-rich-text malaz-rich-text--reading text-justify select-none"
           v-html="chapterHtml"
         ></section>
 

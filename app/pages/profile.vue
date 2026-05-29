@@ -150,7 +150,9 @@ onMounted(async () => {
     try {
       const supabase = useSupabaseClient()
       const { data: { session } } = await supabase.auth.getSession()
-      await authStore.fetchProfile(session?.access_token)
+      if (session?.access_token) {
+        await authStore.fetchProfile(session.access_token)
+      }
     } catch {
       // Global middleware handles unauthenticated users.
     }
@@ -365,13 +367,13 @@ useHead({
 </script>
 
 <template>
-  <div class="container-editorial py-8 sm:py-10">
+  <div class="container-curated py-8 sm:py-10">
     <div class="mx-auto max-w-5xl space-y-8">
       
       <!-- ===== SECTION HEADER ===== -->
       <div class="border-b-4 border-ink pb-4">
         <h2 class="font-heading text-3xl sm:text-4xl font-black uppercase tracking-tight">
-          Reporter Desk Profile
+          User Profile
         </h2>
         <p class="font-mono text-xs text-ink-muted uppercase tracking-widest mt-1">
           Identity logs &bull; Public bio settings
@@ -459,7 +461,7 @@ useHead({
           <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div class="space-y-2 md:col-span-1">
               <label for="displayName" class="font-mono text-xs uppercase tracking-wider text-ink-muted block">
-                Editorial Display Name
+                curated Display Name
               </label>
               <UiInput
                 id="displayName"

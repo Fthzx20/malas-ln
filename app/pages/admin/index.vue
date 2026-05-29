@@ -6,30 +6,35 @@ definePageMeta({
   ssr: false
 })
 
-const { data: analyticsData, pending: analyticsPending, refresh } = await useFetch('/api/admin/analytics')
+const { data: analyticsData, pending: analyticsPending, refresh } = useFetch('/api/admin/analytics', {
+  credentials: 'include',
+  lazy: true,
+})
 
 const overviewStats = computed(() => {
   const stats = analyticsData.value?.stats
   return [
-    { label: 'Cataloged Serials', value: stats?.totalNovels ? String(stats.totalNovels) : '—', hint: 'in public archive', trend: '📋' },
-    { label: 'Published Chapters', value: stats?.totalChapters ? String(stats.totalChapters) : '—', hint: 'total chapters', trend: '📖' },
-    { label: 'Registered Readers', value: stats?.totalUsers ? String(stats.totalUsers) : '—', hint: 'community registry', trend: '👥' },
-    { label: 'Community Comments', value: stats?.totalComments ? String(stats.totalComments) : '—', hint: 'discussion volume', trend: '💬' },
-    { label: 'Active Readers (7d)', value: stats?.activeReaders7d ? String(stats.activeReaders7d) : '—', hint: 'readers online', trend: '⚡' },
-    { label: 'R2 Storage Usage', value: stats?.storageUsageMb ? `${stats.storageUsageMb} MB` : '—', hint: 'assets committed', trend: '☁️' },
+    { label: 'Novels', value: stats?.totalNovels ? String(stats.totalNovels) : '—', hint: 'total novels', trend: '📋' },
+    { label: 'Chapters', value: stats?.totalChapters ? String(stats.totalChapters) : '—', hint: 'total chapters', trend: '📖' },
+    { label: 'Users', value: stats?.totalUsers ? String(stats.totalUsers) : '—', hint: 'registered users', trend: '👥' },
+    { label: 'Comments', value: stats?.totalComments ? String(stats.totalComments) : '—', hint: 'total comments', trend: '💬' },
+    { label: 'Active Users (7d)', value: stats?.activeReaders7d ? String(stats.activeReaders7d) : '—', hint: 'active in 7 days', trend: '⚡' },
+    { label: 'Storage', value: stats?.storageUsageMb ? `${stats.storageUsageMb} MB` : '—', hint: 'estimated usage', trend: '☁️' },
   ]
 })
 
 const quickActions = [
-  { label: 'Catalog new series', to: '/admin/novels', detail: 'Open content ledger and add a new publication.', icon: '📋' },
-  { label: 'Review moderation queue', to: '/admin/moderation', detail: 'Triage pending reports and flagged posts.', icon: '🛡️' },
-  { label: 'Edit homepage notice', to: '/admin/notices', detail: 'Set popup text and active state for the home page.', icon: '🔔' },
-  { label: 'Scheduler desk', to: '/admin/scheduler', detail: 'Manage serialization timing and publishing flow.', icon: '📅' },
-  { label: 'Upload cover art', to: '/admin/uploads', detail: 'Commit assets into the R2 pipeline.', icon: '🖼️' },
+  { label: 'Novels', to: '/admin/novels', detail: 'Create and edit novels.', icon: '📋' },
+  { label: 'Chapters', to: '/admin/chapters', detail: 'Create and review chapters.', icon: '✍️' },
+  { label: 'Moderation', to: '/admin/moderation', detail: 'Review reports and flagged posts.', icon: '🛡️' },
+  { label: 'Users', to: '/admin/users', detail: 'Manage users and staff.', icon: '👥' },
+  { label: 'Scheduler', to: '/admin/scheduler', detail: 'Manage publish timing.', icon: '📅' },
+  { label: 'Notices', to: '/admin/notices', detail: 'Edit the homepage notice.', icon: '🔔' },
+  { label: 'Settings', to: '/admin/settings', detail: 'Configure site settings.', icon: '⚙️' },
 ]
 
 useHead({
-  title: 'Admin Command Board'
+  title: 'Admin Dashboard'
 })
 </script>
 
@@ -39,19 +44,13 @@ useHead({
     <section class="border-b-4 border-ink pb-5">
       <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div class="space-y-1">
-          <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">Admin overview</p>
+          <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">Admin dashboard</p>
           <h2 class="font-heading text-3xl font-black uppercase tracking-tight sm:text-4xl">
-            Command Overview
+            Dashboard
           </h2>
-          <p class="max-w-2xl font-body text-sm text-ink-light sm:text-base">
-            A newsroom-style workspace for cataloging serials, monitoring activity, and keeping the publishing pipeline readable at a glance.
-          </p>
         </div>
 
         <div class="flex flex-wrap gap-2 shrink-0">
-          <NuxtLink to="/admin/novels" class="inline-flex items-center border border-ink px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors hover:bg-ink hover:text-paper">
-            Catalog series
-          </NuxtLink>
           <NuxtLink to="/admin/moderation" class="inline-flex items-center border border-rule px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors hover:border-ink hover:bg-surface-raised">
             Review reports
           </NuxtLink>
@@ -60,8 +59,8 @@ useHead({
     </section>
 
     <!-- ===== STATS GRID ===== -->
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-      <UiCard v-for="stat in overviewStats" :key="stat.label">
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <UiCard v-for="stat in overviewStats" :key="stat.label" class="border border-rule hover:border-ink transition-colors bg-surface relative overflow-hidden group">
         <div class="flex items-start justify-between gap-1">
           <p class="font-mono text-[9px] uppercase tracking-[0.24em] text-ink-muted leading-tight">{{ stat.label }}</p>
           <span class="text-xs filter grayscale opacity-65">{{ stat.trend }}</span>
@@ -73,6 +72,29 @@ useHead({
       </UiCard>
     </div>
 
+    <!-- ===== QUICK ACTIONS (PROMINENT AT TOP FOR UX) ===== -->
+    <section class="border border-ink bg-surface">
+      <div class="flex items-center justify-between border-b border-rule px-5 py-4">
+        <div>
+          <h3 class="font-heading text-lg font-black uppercase tracking-tight">Quick Actions</h3>
+          <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Primary workspace tools</p>
+        </div>
+      </div>
+      <div class="p-5 grid gap-3 grid-cols-2 md:grid-cols-4">
+        <NuxtLink
+          v-for="action in quickActions"
+          :key="action.to"
+          :to="action.to"
+          class="group flex flex-col sm:flex-row items-start sm:items-center gap-3 border border-rule bg-paper p-4 transition-all hover:border-accent hover:shadow-sm"
+        >
+          <span class="text-2xl filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all shrink-0">{{ action.icon }}</span>
+          <div class="flex-1 min-w-0">
+            <h4 class="font-heading text-sm font-bold leading-tight group-hover:text-accent transition-colors">{{ action.label }}</h4>
+          </div>
+        </NuxtLink>
+      </div>
+    </section>
+
     <!-- ===== MAIN CONTENT GRID ===== -->
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
       <!-- Left side: Activity Feed & Reports Triage -->
@@ -81,11 +103,11 @@ useHead({
         <section class="border border-ink bg-surface">
           <div class="flex items-center justify-between gap-4 border-b border-ink px-5 py-4">
             <div>
-              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Recent Uploads</h3>
-              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Latest chapters committed to catalog</p>
+              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Recent Chapters</h3>
+              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Latest chapters added</p>
             </div>
-            <NuxtLink to="/admin/manuscripts" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
-              Open manuscripts →
+            <NuxtLink to="/admin/chapters" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
+              Open chapters →
             </NuxtLink>
           </div>
 
@@ -106,13 +128,13 @@ useHead({
                 </div>
                 <div class="text-right shrink-0">
                   <span class="text-[10px] text-ink-muted block">{{ new Date(item.createdAt).toLocaleDateString() }}</span>
-                  <NuxtLink :to="`/admin/manuscripts/editor?chapterId=${item.id}`" class="text-[9px] uppercase tracking-wider text-accent font-bold hover:underline">Edit</NuxtLink>
+                  <NuxtLink :to="`/admin/chapters/editor?chapterId=${item.id}`" class="text-[9px] uppercase tracking-wider text-accent font-bold hover:underline">Edit</NuxtLink>
                 </div>
               </div>
             </div>
 
             <div v-else class="border border-dashed border-rule p-8 text-center text-sm text-ink-muted">
-              No recent uploads yet. Start by writing a chapter.
+              No recent chapters yet. Create one to see it here.
             </div>
           </div>
         </section>
@@ -121,11 +143,11 @@ useHead({
         <section class="border border-ink bg-surface">
           <div class="flex items-center justify-between gap-4 border-b border-ink px-5 py-4">
             <div>
-              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Active Reports Triage</h3>
-              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Flagged reader items needing review</p>
+              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Reports</h3>
+              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Pending items for review</p>
             </div>
             <NuxtLink to="/admin/moderation" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
-              Full Queue →
+              Full list →
             </NuxtLink>
           </div>
 
@@ -135,7 +157,7 @@ useHead({
             </div>
 
             <div v-else-if="analyticsData?.recentReports?.length" class="overflow-x-auto">
-              <table class="w-full text-left font-mono text-[11px] border-collapse min-w-[500px]">
+              <table class="w-full min-w-125 border-collapse text-left font-mono text-[11px]">
                 <thead>
                   <tr class="bg-surface-raised border-b border-ink uppercase text-ink-muted font-bold tracking-wider text-[9px]">
                     <th class="p-2.5">Reporter</th>
@@ -150,7 +172,7 @@ useHead({
                     <td class="p-2.5 font-bold">@{{ report.reporter?.username }}</td>
                     <td class="p-2.5 uppercase text-accent font-bold text-[10px]">{{ report.targetType }}</td>
                     <td class="p-2.5 text-ink-light">{{ report.reason }}</td>
-                    <td class="p-2.5 max-w-[180px] truncate text-ink-muted" :title="report.description">{{ report.description || '—' }}</td>
+                    <td class="max-w-45 p-2.5 truncate text-ink-muted" :title="report.description || ''">{{ report.description || '—' }}</td>
                     <td class="p-2.5 text-right">
                       <NuxtLink to="/admin/moderation" class="px-2 py-1 border border-ink bg-ink text-paper text-[8px] uppercase tracking-wider font-bold hover:bg-accent hover:border-accent">Triage</NuxtLink>
                     </td>
@@ -160,45 +182,20 @@ useHead({
             </div>
 
             <div v-else class="border border-dashed border-rule p-8 text-center text-sm text-ink-muted italic font-body">
-              Clean desk! There are no pending reports to review.
+              No pending reports.
             </div>
           </div>
         </section>
       </div>
 
-      <!-- Right sidebar: Quick Actions & Popular Novels -->
-      <aside class="xl:col-span-4 space-y-6">
-        <!-- Quick Actions -->
-        <section class="border border-ink bg-paper">
-          <div class="flex items-center justify-between border-b border-rule px-5 py-4">
-            <div>
-              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Quick Actions</h3>
-              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Workspace shortcuts</p>
-            </div>
-          </div>
-
-          <div class="p-5 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-1">
-            <NuxtLink
-              v-for="action in quickActions"
-              :key="action.to"
-              :to="action.to"
-              class="group flex items-start gap-3 border border-rule bg-surface p-3.5 transition-all hover:border-ink hover:bg-surface-raised"
-            >
-              <div class="flex-1 min-w-0">
-                <h4 class="font-heading text-sm font-bold leading-tight group-hover:text-accent transition-colors">{{ action.label }}</h4>
-                <p class="mt-0.5 text-xs text-ink-light leading-snug">{{ action.detail }}</p>
-              </div>
-              <span class="text-ink-muted text-sm transition-transform group-hover:translate-x-0.5 flex-shrink-0">↗</span>
-            </NuxtLink>
-          </div>
-        </section>
-
         <!-- Trending titles -->
+      <!-- Right sidebar: Popular Novels -->
+      <aside class="xl:col-span-4 space-y-6">
         <section class="border border-rule bg-surface">
           <div class="flex items-center justify-between border-b border-rule px-5 py-4">
             <div>
-              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Trending Serials</h3>
-              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Highest reader bookmark counts</p>
+              <h3 class="font-heading text-lg font-black uppercase tracking-tight">Popular Novels</h3>
+              <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Most bookmarked novels</p>
             </div>
           </div>
 
@@ -213,7 +210,7 @@ useHead({
                 :key="item.novel?.id"
                 class="flex items-center gap-3 border border-rule p-3 hover:border-ink transition-colors bg-paper"
               >
-                <span class="font-heading text-2xl font-extrabold text-accent leading-none w-7 text-center flex-shrink-0">{{ idx + 1 }}</span>
+                <span class="w-7 shrink-0 text-center font-heading text-2xl font-extrabold leading-none text-accent">{{ idx + 1 }}</span>
                 <div class="w-9 h-12 shrink-0 border border-rule bg-surface-sunken overflow-hidden">
                   <NuxtImg v-if="item.novel?.coverUrl" :src="item.novel.coverUrl" width="36" height="48" class="h-full w-full object-cover" loading="lazy" />
                 </div>

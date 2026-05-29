@@ -1,11 +1,33 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'auth',
 })
 
+const authStore = useAuthStore()
 const supabaseUser = useSupabaseUser()
+
+const waitForAuthenticatedProfile = async (timeoutMs = 3000) => {
+  if (authStore.isAuthenticated) {
+    return true
+  }
+
+  return await new Promise<boolean>((resolve) => {
+    const timer = setTimeout(() => {
+      stop()
+      resolve(authStore.isAuthenticated)
+    }, timeoutMs)
+
+    const stop = watch(() => authStore.isAuthenticated, (isAuthenticated) => {
+      if (!isAuthenticated) return
+      clearTimeout(timer)
+      stop()
+      resolve(true)
+    })
+  })
+}
 
 onMounted(() => {
   void (async () => {
@@ -13,18 +35,22 @@ onMounted(() => {
     await $authReady
     const sessionUser = supabaseUser.value
     if (sessionUser) {
-      await navigateTo('/')
+      const isAuthenticated = await waitForAuthenticatedProfile()
+      if (isAuthenticated) {
+        await navigateTo('/')
+      }
       return
     }
 
-    await navigateTo('/auth/login')
+    // Stay on this page when registration is pending email verification.
+    // The user can return to login manually from the button below.
   })()
 })
 
 useHead({
   title: 'Confirm Email',
   meta: [
-    { name: 'description', content: 'Confirm your Rano LN account email address.' },
+    { name: 'description', content: 'Confirm your Malaz Scans account email address.' },
   ],
 })
 </script>
@@ -42,7 +68,7 @@ useHead({
 
     <div class="space-y-3 px-2">
       <p class="font-body text-sm text-ink-light leading-relaxed">
-        If your email confirmation is complete, you will be sent into the newsroom automatically.
+        If your email confirmation is complete, you will be sent into the platform automatically.
       </p>
       <p class="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
         Waiting for authentication state

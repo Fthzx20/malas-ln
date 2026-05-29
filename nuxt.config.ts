@@ -36,7 +36,7 @@ export default defineNuxtConfig({
     r2BucketName: process.env.R2_BUCKET_NAME,
     public: {
       r2PublicUrl: process.env.R2_PUBLIC_URL || '',
-      appName: 'Rano LN',
+      appName: 'Malaz Scans',
     },
   },
 
@@ -46,8 +46,8 @@ export default defineNuxtConfig({
 
   image: {
     provider: 'ipx',
-    quality: 80,
-    format: ['webp', 'avif'],
+    quality: 100, // Non-destructive quality as per requirements
+    format: ['webp', 'avif', 'png', 'jpg'], // Allow all formats natively
   },
 
   supabase: {
@@ -67,14 +67,15 @@ export default defineNuxtConfig({
         '/community/*',
       ],
     },
+    redirect: false, // Disables built-in middleware to avoid conflicting with auth.global.ts
   },
 
   pwa: isProduction ? {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'Rano LN — Light Novel Platform',
-      short_name: 'Rano LN',
-      description: 'A premium Light Novel reading platform with editorial design.',
+      name: 'Malaz Scans — Light Novel Platform',
+      short_name: 'Malaz Scans',
+      description: 'A premium Light Novel reading platform with curated design.',
       theme_color: '#F9F9F7',
       background_color: '#F9F9F7',
       display: 'standalone',
@@ -144,14 +145,14 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
-      title: 'Rano LN — Light Novel Platform',
+      title: 'Malaz Scans — Light Novel Platform',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'A premium Light Novel reading platform featuring editorial newsprint design, curated translations, and immersive reading experience.' },
+        { name: 'description', content: 'A premium Light Novel reading platform featuring minimalist design, curated translations, and immersive reading experience.' },
         { name: 'theme-color', content: '#F9F9F7' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:site_name', content: 'Rano LN' },
+        { property: 'og:site_name', content: 'Malaz Scans' },
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },

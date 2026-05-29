@@ -1,9 +1,13 @@
 import { siteNotice } from '@@/server/database/schema'
 import { withDB } from '@@/server/utils/db'
 import { ensureSiteNoticeTable } from '@@/server/utils/site-notice'
+import { throwApiError } from '@@/server/utils/errors'
 
 export default defineEventHandler(async (event) => {
-  await requireRole(event, 'admin')
+  const user = event.context.user
+  if (!user || user.role !== 'admin') {
+    throwApiError(403, 'Unauthorized. Admin access required.')
+  }
 
   return await withDB(async (db) => {
     await ensureSiteNoticeTable(db)

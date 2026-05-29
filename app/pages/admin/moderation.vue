@@ -13,7 +13,7 @@ const authStore = useAuthStore()
 const activeStatus = ref('pending')
 
 // Fetch reports with status query
-const { data: reportsData, pending, refresh } = await useFetch('/api/admin/reports', {
+const { data: reportsData, pending, refresh } = useFetch('/api/admin/reports', {
   query: { status: activeStatus },
   watch: [activeStatus]
 })
@@ -60,7 +60,7 @@ const handleDeleteComment = async (commentId: string, reportId: string) => {
 }
 
 useHead({
-  title: 'Moderation Command Desk'
+  title: 'Moderation'
 })
 </script>
 
@@ -69,10 +69,10 @@ useHead({
     <!-- ===== HEADER ===== -->
     <div class="border-b-4 border-ink pb-4">
       <h2 class="font-heading text-2xl sm:text-3xl font-black uppercase tracking-tight">
-        The Moderation Desk
+        Moderation
       </h2>
       <p class="font-mono text-[10px] text-ink-muted uppercase tracking-wider mt-0.5">
-        Flagged Manuscripts &bull; Forum Moderation Panel
+        Review flagged content
       </p>
     </div>
 
@@ -90,20 +90,20 @@ useHead({
         class="px-4 py-2 border border-ink tracking-wider transition-colors"
         :class="activeStatus === 'reviewed' ? 'bg-ink text-paper border-ink font-black' : 'border-transparent hover:text-accent'"
       >
-        Reviewed Archives
+        Reviewed
       </button>
       <button 
         @click="activeStatus = 'dismissed'"
         class="px-4 py-2 border border-ink tracking-wider transition-colors"
         :class="activeStatus === 'dismissed' ? 'bg-ink text-paper border-ink font-black' : 'border-transparent hover:text-accent'"
       >
-        Dismissed Logs
+        Dismissed
       </button>
     </div>
 
-    <!-- ===== REPORTS LEDGER ===== -->
+    <!-- ===== REPORTS list ===== -->
     <main class="border border-ink bg-surface overflow-x-auto">
-      <table class="w-full text-left font-mono text-xs border-collapse min-w-[700px]">
+      <table class="w-full text-left font-mono text-xs border-collapse min-w-175">
         <thead>
           <tr class="bg-surface-raised border-b border-ink uppercase text-ink-muted font-bold tracking-wider">
             <th class="p-3">Reporter</th>
@@ -111,7 +111,7 @@ useHead({
             <th class="p-3">Violation Reason</th>
             <th class="p-3">Flagged Content Details</th>
             <th class="p-3">Reporter Description</th>
-            <th class="p-3">Dispatched Date</th>
+            <th class="p-3">Date</th>
             <th class="p-3 text-right" v-if="activeStatus === 'pending'">Actions</th>
           </tr>
         </thead>
@@ -123,7 +123,7 @@ useHead({
           </tr>
           <tr v-else-if="!reportsData?.data?.length">
             <td colspan="7" class="p-8 text-center italic text-ink-muted font-body">
-              No reports registered under this catalog filter.
+              No reports found for this filter.
             </td>
           </tr>
           <tr 
@@ -146,11 +146,11 @@ useHead({
               {{ report.reason }}
             </td>
             <!-- Flagged Content Details -->
-            <td class="p-3 max-w-[280px] truncate text-ink font-body text-xs italic" :title="report.targetContent">
+            <td class="p-3 max-w-70 truncate text-ink font-body text-xs italic" :title="report.targetContent">
               <span class="block truncate bg-surface-sunken p-1.5 border border-rule">{{ report.targetContent }}</span>
             </td>
             <!-- Description -->
-            <td class="p-3 max-w-[180px] truncate text-ink-light" :title="report.description || undefined">
+            <td class="p-3 max-w-45 truncate text-ink-light" :title="report.description || undefined">
               {{ report.description || 'No comment provided.' }}
             </td>
             <!-- Date -->
@@ -164,14 +164,14 @@ useHead({
                   @click="handleResolveReport(report.id, 'reviewed')"
                   class="px-2 py-1 bg-ink text-paper hover:bg-accent uppercase font-bold text-[9px]"
                 >
-                  Resolve
+                  Mark Reviewed
                 </button>
                 <button 
                   v-if="report.targetType === 'comment' && report.targetContent !== 'Comment has been deleted' && report.targetContent !== 'Comment has been deleted'"
                   @click="handleDeleteComment(report.targetId, report.id)"
                   class="px-2 py-1 border border-accent bg-paper text-accent hover:bg-accent hover:text-paper uppercase font-bold text-[9px]"
                 >
-                  Delete Comment
+                  Delete
                 </button>
                 <button 
                   @click="handleResolveReport(report.id, 'dismissed')"

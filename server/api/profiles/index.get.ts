@@ -4,7 +4,7 @@ import { sanitizeSqlLike } from '@@/server/utils/auth'
 import { sanitizeSearchInput } from '@@/server/utils/validate'
 
 export default defineEventHandler(async (event) => {
-  // Safe staff only registry lookup
+  // Safe staff only database lookup
   await requireRole(event, 'admin')
   
   const query = getQuery(event)

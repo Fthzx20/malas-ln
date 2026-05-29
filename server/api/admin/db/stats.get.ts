@@ -12,23 +12,49 @@ import {
   bookmarks,
 } from '@@/server/database/schema'
 
-export default defineEventHandler(async (event) => {
+export default defineCachedEventHandler(async (event) => {
   await requireRole(event, 'admin')
 
   const db = useDB()
 
   // Basic counts for quick profiling dashboard
+  const [
+    novelsCount,
+    chaptersCount,
+    commentsCount,
+    forumPostsCount,
+    forumRepliesCount,
+    notificationsCount,
+    profilesCount,
+    ratingsCount,
+    bookmarksCount,
+  ] = await Promise.all([
+    db.$count(novels),
+    db.$count(chapters),
+    db.$count(comments),
+    db.$count(forumPosts),
+    db.$count(forumReplies),
+    db.$count(notifications),
+    db.$count(profiles),
+    db.$count(ratings),
+    db.$count(bookmarks),
+  ])
+
   const counts = {
-    novels: await db.$count(novels),
-    chapters: await db.$count(chapters),
-    comments: await db.$count(comments),
-    forumPosts: await db.$count(forumPosts),
-    forumReplies: await db.$count(forumReplies),
-    notifications: await db.$count(notifications),
-    profiles: await db.$count(profiles),
-    ratings: await db.$count(ratings),
-    bookmarks: await db.$count(bookmarks),
+    novels: novelsCount,
+    chapters: chaptersCount,
+    comments: commentsCount,
+    forumPosts: forumPostsCount,
+    forumReplies: forumRepliesCount,
+    notifications: notificationsCount,
+    profiles: profilesCount,
+    ratings: ratingsCount,
+    bookmarks: bookmarksCount,
   }
 
   return { counts }
+}, {
+  maxAge: 30,
+  staleMaxAge: 30,
+  swr: true,
 })

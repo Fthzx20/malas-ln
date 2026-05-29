@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
+import { Buffer } from 'node:buffer'
 import { logger } from './logger'
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseUser } from '#supabase/server'
 
 export type UserRole = 'user' | 'translator' | 'admin'
 
@@ -9,9 +10,10 @@ export interface AuthUser {
   email: string
   role: UserRole
   profileId?: string
+  metadata?: Record<string, unknown>
 }
 
-const AUTH_LOOKUP_TIMEOUT_MS = 2500
+const AUTH_LOOKUP_TIMEOUT_MS = 10000
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
   return Promise.race<T>([
@@ -20,14 +22,15 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Pr
   ])
 }
 
-/**
- * Get the authenticated user from the request.
- * Returns null if not authenticated.
- */
-export async function getAuthUser(event: H3Event): Promise<AuthUser | null> {
+async function resolveAuthUser(event: H3Event): Promise<AuthUser | null> {
   try {
-    // Prefer serverSupabaseUser (cookie/session) which avoids a network call
-    const sessionUser = await serverSupabaseUser(event)
+    let sessionUser = null
+    try {
+      // Prefer serverSupabaseUser (cookie/session) which avoids a network call
+      sessionUser = await serverSupabaseUser(event)
+    } catch (err) {
+      // Ignore missing cookie session errors; proceed to token fallback
+    }
     if (sessionUser) {
       const db = useDB()
       const profile = await db.query.profiles.findFirst({
@@ -40,29 +43,33 @@ export async function getAuthUser(event: H3Event): Promise<AuthUser | null> {
         email: sessionUser.email || '',
         role: (profile?.role as UserRole) || 'user',
         profileId: profile?.id,
+        metadata: (sessionUser as any)?.user_metadata || {},
       }
     }
 
     // Fallback: check Authorization header Bearer token (less common but supported)
-    const authorization = getHeader(event, 'authorization') || getHeader(event, 'Authorization')
+    const authorization =
+      getHeader(event, 'authorization') ||
+      getHeader(event, 'Authorization') ||
+      event.node?.req?.headers?.authorization ||
+      event.node?.req?.headers?.Authorization
     if (authorization?.startsWith('Bearer ')) {
       const token = authorization.slice('Bearer '.length).trim()
       if (token) {
-        const supabase = await serverSupabaseClient(event)
-        const { data, error } = await supabase.auth.getUser(token)
-        const user = data?.user
-        if (!error && user) {
+        const decoded = decodeSupabaseJwt(token)
+        if (decoded) {
           const db = useDB()
           const profile = await db.query.profiles.findFirst({
-            where: (profiles, { eq }) => eq(profiles.authId, user.id),
+            where: (profiles, { eq }) => eq(profiles.authId, decoded.id),
             columns: { id: true, role: true },
           })
 
           return {
-            id: user.id,
-            email: user.email || '',
+            id: decoded.id,
+            email: decoded.email,
             role: (profile?.role as UserRole) || 'user',
             profileId: profile?.id,
+            metadata: decoded.metadata,
           }
         }
       }
@@ -74,11 +81,55 @@ export async function getAuthUser(event: H3Event): Promise<AuthUser | null> {
   }
 }
 
+function decodeSupabaseJwt(token: string): { id: string; email: string; metadata: Record<string, unknown> } | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+
+    const payload = JSON.parse(Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')) as {
+      sub?: unknown
+      aud?: unknown
+      email?: unknown
+      user_metadata?: unknown
+      exp?: unknown
+    }
+
+    if (payload.aud !== 'authenticated') return null
+    if (typeof payload.sub !== 'string' || !payload.sub) return null
+    if (typeof payload.email !== 'string' || !payload.email) return null
+    if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) return null
+
+    return {
+      id: payload.sub,
+      email: payload.email,
+      metadata: isRecord(payload.user_metadata) ? payload.user_metadata : {},
+    }
+  } catch {
+    return null
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+/**
+ * Get the authenticated user from the request.
+ * Returns null if not authenticated.
+ */
+export async function getOptionalUser(event: H3Event): Promise<AuthUser | null> {
+  return await resolveAuthUser(event)
+}
+
+export async function getAuthUser(event: H3Event): Promise<AuthUser | null> {
+  return await resolveAuthUser(event)
+}
+
 /**
  * Require authentication. Throws 401 if not authenticated.
  */
 export async function requireAuth(event: H3Event): Promise<AuthUser> {
-  const user = await withTimeout(getAuthUser(event), AUTH_LOOKUP_TIMEOUT_MS, null)
+  const user = await withTimeout(resolveAuthUser(event), AUTH_LOOKUP_TIMEOUT_MS, null)
   if (!user) {
     // Log helpful context for debugging auth churn (dev only) at info level
     try {
@@ -91,8 +142,10 @@ export async function requireAuth(event: H3Event): Promise<AuthUser> {
     throw createError({
       statusCode: 401,
       statusMessage: 'Authentication required',
+      fatal: false,
+      unhandled: false,
       data: { statusCode: 401 },
-    })
+    } as any)
   }
   return user
 }
@@ -106,8 +159,10 @@ export async function requireRole(event: H3Event, ...roles: UserRole[]): Promise
     throw createError({
       statusCode: 403,
       statusMessage: `Forbidden. Required role: ${roles.join(' or ')}`,
+      fatal: false,
+      unhandled: false,
       data: { statusCode: 403 },
-    })
+    } as any)
   }
   return user
 }
@@ -131,11 +186,13 @@ export async function checkBanned(event: H3Event): Promise<AuthUser> {
     throw createError({
       statusCode: 403,
       statusMessage: 'Your account has been suspended',
+      fatal: false,
+      unhandled: false,
       data: {
         statusCode: 403,
         reason: profile.banReason || 'Violated community guidelines',
       },
-    })
+    } as any)
   }
   return user
 }

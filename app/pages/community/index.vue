@@ -2,7 +2,7 @@
 useHead({
   title: 'Community Board',
   meta: [
-    { name: 'description', content: 'Participate in the Rano LN discussion forums. Share feedback, request reviews, and meet other light novel readers.' }
+    { name: 'description', content: 'Participate in the Malaz Scans discussion forums. Share feedback, request reviews, and meet other light novel readers.' }
   ]
 })
 
@@ -14,7 +14,7 @@ const forumData = computed(() => forumDataRaw.value as any)
 </script>
 
 <template>
-  <div class="container-editorial py-8">
+  <div class="container-curated py-8">
     <!-- ===== SECTION HEADER ===== -->
     <div class="border-b-4 border-ink pb-4 mb-8">
       <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight">
@@ -64,7 +64,7 @@ const forumData = computed(() => forumDataRaw.value as any)
             <!-- Post Counts Badge -->
             <NuxtLink 
               :to="`/community/${cat.slug}`"
-              class="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 border border-rule bg-paper hover:bg-surface-sunken transition-colors"
+              class="shrink-0 flex flex-col items-center justify-center w-16 h-16 border border-rule bg-paper hover:bg-surface-sunken transition-colors"
             >
               <span class="font-heading text-lg font-bold text-accent">{{ cat.postCount }}</span>
               <span class="font-mono text-[9px] text-ink-muted uppercase">threads</span>
@@ -73,7 +73,7 @@ const forumData = computed(() => forumDataRaw.value as any)
         </div>
       </main>
 
-      <!-- Sidebar Editorial Column (Col span 4) -->
+      <!-- Sidebar curated Column (Col span 4) -->
       <aside class="lg:col-span-4 space-y-8">
         <!-- Forum rules -->
         <div class="border border-ink p-5 bg-paper">

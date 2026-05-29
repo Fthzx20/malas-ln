@@ -7,7 +7,7 @@ useToastProvider()
 
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} — Rano LN` : 'Rano LN — Light Novel Platform'
+    return titleChunk ? `${titleChunk} — Malaz Scans` : 'Malaz Scans'
   },
   link: [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -17,12 +17,18 @@ useHead({
 
 // Lazy-load the toast component on client only to reduce SSR bundle weight
 const AsyncUiToast = defineAsyncComponent(() => import('~/components/ui/UiToast.vue'))
+const AsyncHomepageNotice = defineAsyncComponent(() => import('~/components/ui/HomepageNotice.vue'))
 </script>
 
 <template>
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <ClientOnly>
+    <Suspense>
+      <AsyncHomepageNotice />
+    </Suspense>
+  </ClientOnly>
   <!-- Global notification portal (client-only, async) -->
   <ClientOnly>
     <Suspense>

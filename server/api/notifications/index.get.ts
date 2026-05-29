@@ -1,21 +1,21 @@
 import { and, desc, eq, lt } from 'drizzle-orm'
 import { notifications } from '@@/server/database/schema'
-import { cleanupExpiredNotifications } from '@@/server/utils/notifications'
-import { throwApiError } from '@@/server/utils/errors'
 import { logger } from '@@/server/utils/logger'
+import { getOptionalUser } from '@@/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   logger.info('[api] notifications GET start')
-  let user
-  try {
-    user = await requireAuth(event)
-  } catch (_err) {
-    throwApiError(401, 'Authentication required')
+  const user = await getOptionalUser(event)
+  if (!user?.profileId) {
+    return {
+      authenticated: false,
+      items: [],
+      nextCursor: null,
+      hasMore: false,
+      unreadCount: 0,
+    }
   }
   logger.info('[api] notifications GET after requireAuth')
-  if (!user.profileId) {
-    throwApiError(401, 'Authentication required')
-  }
 
   const db = useDB()
 
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   const items = await db.query.notifications.findMany({
     where: (n, { and, eq, lt }) => and(
-      eq(n.recipientId, user.profileId),
+      eq(n.recipientId, user.profileId as string),
       cursor ? lt(n.createdAt, cursor) : undefined,
     ),
     with: {
@@ -45,6 +45,7 @@ export default defineEventHandler(async (event) => {
   logger.info('[api] notifications GET DB queries complete')
 
   return {
+    authenticated: true,
     items: sliced,
     nextCursor,
     hasMore,

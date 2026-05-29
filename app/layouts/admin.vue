@@ -12,7 +12,7 @@ const sidebarSections = [
     links: [
       { label: 'Overview', to: '/admin', icon: 'chart', exact: true },
       { label: 'Novels', to: '/admin/novels', icon: 'book', exact: false },
-      { label: 'Manuscripts', to: '/admin/manuscripts', icon: 'edit', exact: false },
+      { label: 'Chapters', to: '/admin/chapters', icon: 'edit', exact: false },
       { label: 'Scheduler', to: '/admin/scheduler', icon: 'clock', exact: false },
     ],
   },
@@ -20,9 +20,10 @@ const sidebarSections = [
     title: 'Operations',
     links: [
       { label: 'Moderation', to: '/admin/moderation', icon: 'shield', exact: false },
+      { label: 'Forum', to: '/admin/forum', icon: 'message-square', exact: false },
       { label: 'Notices', to: '/admin/notices', icon: 'bell', exact: false },
       { label: 'Users', to: '/admin/users', icon: 'users', exact: false },
-      { label: 'Uploads', to: '/admin/uploads', icon: 'upload', exact: false },
+      { label: 'Settings', to: '/admin/settings', icon: 'settings', exact: false },
     ],
   },
 ]
@@ -48,13 +49,14 @@ const pageTitle = computed(() => {
   const path = activePath.value
   if (path === '/admin') return 'Command Overview'
   if (path.startsWith('/admin/novels')) return 'Catalog Desk'
-  if (path.startsWith('/admin/manuscripts')) return 'Manuscript Intake'
+  if (path.startsWith('/admin/chapters')) return 'Manuscript Intake'
   if (path.startsWith('/admin/scheduler')) return 'Release Scheduler'
   if (path.startsWith('/admin/moderation')) return 'Moderation Desk'
+  if (path.startsWith('/admin/forum')) return 'Forum Management'
   if (path.startsWith('/admin/notices')) return 'Site Notices'
-  if (path.startsWith('/admin/users')) return 'Reader Registry'
-  if (path.startsWith('/admin/uploads')) return 'Asset Pipeline'
-  return 'Editorial Command Board'
+  if (path.startsWith('/admin/users')) return 'Reader database'
+  if (path.startsWith('/admin/settings')) return 'Platform Settings'
+  return 'curated Command Board'
 })
 
 const closeSidebar = () => {
@@ -85,14 +87,14 @@ watch(() => route.fullPath, closeSidebar)
       >
         <div class="flex h-full flex-col overflow-hidden">
           <!-- Sidebar header / branding -->
-          <div class="border-b border-rule px-5 py-5 flex-shrink-0">
+          <div class="border-b border-rule px-5 py-5 shrink-0">
             <NuxtLink to="/" class="block space-y-0.5 group" @click="closeSidebar">
-              <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">Admin newsroom</p>
+              <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">Admin platform</p>
               <h1 class="font-heading text-2xl font-black leading-none tracking-tight group-hover:text-accent transition-colors">
-                RANO<span class="text-accent group-hover:text-ink transition-colors">LN</span>
+                MALAZ<span class="text-accent group-hover:text-ink transition-colors">LN</span>
               </h1>
               <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-muted">
-                Editorial command board
+                curated command board
               </p>
             </NuxtLink>
           </div>
@@ -146,7 +148,7 @@ watch(() => route.fullPath, closeSidebar)
           </nav>
 
           <!-- User profile footer -->
-          <div class="border-t border-rule px-5 py-4 flex-shrink-0">
+          <div class="border-t border-rule px-5 py-4 shrink-0">
             <div class="flex items-center gap-3">
               <UiAvatar :src="authStore.avatarUrl || ''" :name="authStore.displayName" size="sm" />
               <div class="min-w-0 flex-1">

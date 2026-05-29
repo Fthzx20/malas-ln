@@ -15,7 +15,7 @@ const router = useRouter()
 const toast = useToast()
 const authStore = useAuthStore()
 
-const { data: novelsData, pending: novelsPending } = await useFetch('/api/novels', {
+const { data: novelsData, pending: novelsPending } = useFetch('/api/novels', {
   query: { limit: 100 },
 })
 
@@ -62,9 +62,9 @@ const handleCreateChapter = async () => {
     })
 
     toast.success('Chapter created. Opening editor...')
-    await router.push(`/admin/manuscripts/editor?chapterId=${chapter.id}`)
+    await router.push(`/admin/chapters/editor?chapterId=${chapter.id}`)
   } catch (err) {
-    clientLogger.error('[manuscripts/new] create chapter failed', err)
+    clientLogger.error('[chapters/new] create chapter failed', err)
     toast.error('Failed to create chapter')
   } finally {
     isSaving.value = false
@@ -76,8 +76,8 @@ const handleCreateChapter = async () => {
   <div class="space-y-6 font-ui min-h-[calc(100vh-120px)] flex flex-col">
     <div class="border-b border-rule pb-3 flex items-center justify-between shrink-0 gap-3">
       <div>
-        <NuxtLink to="/admin/manuscripts" class="font-mono text-xs uppercase hover:text-accent font-bold mb-0.5 block">&larr; Manuscripts Directory</NuxtLink>
-        <h2 class="font-heading text-xl sm:text-2xl font-black uppercase tracking-tight">Create Chapter First</h2>
+        <NuxtLink to="/admin/chapters" class="font-mono text-xs uppercase hover:text-accent font-bold mb-0.5 block">&larr; Chapters Directory</NuxtLink>
+        <h2 class="font-heading text-xl sm:text-2xl font-black uppercase tracking-tight">New Chapter</h2>
       </div>
 
       <UiButton @click="handleCreateChapter" variant="primary" :loading="isSaving">
@@ -88,9 +88,9 @@ const handleCreateChapter = async () => {
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 min-h-0 flex-1">
       <section class="xl:col-span-8 border border-ink bg-paper p-5 space-y-5">
         <div class="space-y-2">
-          <h3 class="font-heading text-base font-black uppercase border-b border-ink pb-1.5">Chapter Intake</h3>
+          <h3 class="font-heading text-base font-black uppercase border-b border-ink pb-1.5">New Chapter</h3>
           <p class="font-mono text-[10px] uppercase text-ink-muted tracking-wider">
-            Pick the series, create the chapter shell, then jump straight into the writing room.
+            Select a novel, create the chapter, then open the editor.
           </p>
         </div>
 
@@ -115,19 +115,19 @@ const handleCreateChapter = async () => {
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
-            <label class="block font-mono text-[10px] uppercase font-bold text-ink-muted">Translator Group</label>
+            <label class="block font-mono text-[10px] uppercase font-bold text-ink-muted">Translator</label>
             <UiInput v-model="form.translatorGroup" placeholder="Group name..." class="w-full" />
           </div>
           <div class="space-y-1">
-            <label class="block font-mono text-[10px] uppercase font-bold text-ink-muted">Release Time (Scheduler)</label>
+            <label class="block font-mono text-[10px] uppercase font-bold text-ink-muted">Publish time</label>
             <UiInput v-model="form.publishAt" type="datetime-local" placeholder="Optional" class="w-full" />
           </div>
         </div>
 
         <div class="pt-2 border-t border-rule flex items-center justify-between gap-4">
           <div>
-            <span class="block font-heading text-sm font-bold">Publish Instantly</span>
-            <span class="block font-mono text-[9px] text-ink-muted uppercase">Enable this only if the chapter should go public right away.</span>
+            <span class="block font-heading text-sm font-bold">Publish now</span>
+            <span class="block font-mono text-[9px] text-ink-muted uppercase">Use this only if the chapter should go live now.</span>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" v-model="form.isPublished" class="rounded-none border-ink text-accent focus:ring-accent w-5 h-5 cursor-pointer" />
@@ -137,28 +137,28 @@ const handleCreateChapter = async () => {
 
       <aside class="xl:col-span-4 border border-ink bg-surface p-5 space-y-4">
         <div class="space-y-2">
-          <h3 class="font-heading text-base font-black uppercase border-b border-ink pb-1.5">What Happens Next</h3>
+          <h3 class="font-heading text-base font-black uppercase border-b border-ink pb-1.5">Next</h3>
           <p class="font-mono text-[10px] uppercase text-ink-muted tracking-wider">
-            The chapter shell is created first, then the editor opens with more room to write.
+            The chapter is created first, then the editor opens.
           </p>
         </div>
 
         <div class="border border-rule bg-paper p-4 space-y-3">
           <div>
-            <p class="font-mono text-[10px] uppercase text-ink-muted">Selected Series</p>
+            <p class="font-mono text-[10px] uppercase text-ink-muted">Selected novel</p>
             <p class="font-heading text-lg font-black">{{ selectedNovel?.title || 'No series selected' }}</p>
           </div>
           <div>
-            <p class="font-mono text-[10px] uppercase text-ink-muted">New Chapter</p>
+            <p class="font-mono text-[10px] uppercase text-ink-muted">Chapter title</p>
             <p class="font-heading text-lg font-black">{{ form.title || 'Untitled Chapter' }}</p>
           </div>
           <div>
-            <p class="font-mono text-[10px] uppercase text-ink-muted">Target Route</p>
-            <p class="font-mono text-xs break-all text-ink-muted">/admin/manuscripts/editor</p>
+            <p class="font-mono text-[10px] uppercase text-ink-muted">Target page</p>
+            <p class="font-mono text-xs break-all text-ink-muted">/admin/chapters/editor</p>
           </div>
         </div>
 
-        <div v-if="novelsPending" class="text-xs font-mono text-ink-muted uppercase">Loading series ledger...</div>
+        <div v-if="novelsPending" class="text-xs font-mono text-ink-muted uppercase">Loading series list...</div>
       </aside>
     </div>
   </div>

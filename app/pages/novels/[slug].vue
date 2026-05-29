@@ -154,7 +154,7 @@ const getRatingPercentage = (rating: number) => {
 </script>
 
 <template>
-  <div class="container-editorial py-8">
+  <div class="container-curated py-8">
     <div v-if="pending" class="space-y-8">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <UiSkeleton class="lg:col-span-4 h-96 w-full" />
@@ -175,7 +175,7 @@ const getRatingPercentage = (rating: number) => {
     </div>
 
     <div v-else class="space-y-8 sm:space-y-10">
-      <!-- ===== EDITORIAL MASTHEAD GRID ===== -->
+      <!-- ===== curated MASTHEAD GRID ===== -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
         <!-- Cover Art Panel (Col span 4) -->
         <div class="lg:col-span-4">
@@ -243,7 +243,7 @@ const getRatingPercentage = (rating: number) => {
             <!-- Synopsis Section -->
             <div class="prose max-w-none">
               <h3 class="font-heading text-lg font-black uppercase mb-2 border-b border-rule pb-1 tracking-tight">
-                Editorial Synopsis
+                curated Synopsis
               </h3>
               <p class="font-body text-base leading-relaxed text-ink-light whitespace-pre-line">
                 {{ novelData.novel.synopsis }}
@@ -323,7 +323,7 @@ const getRatingPercentage = (rating: number) => {
         </div>
       </section>
 
-      <!-- ===== BOTTOM EDITORIAL TABS SYSTEM ===== -->
+      <!-- ===== BOTTOM curated TABS SYSTEM ===== -->
       <section class="border border-ink bg-surface">
         <UiTabs v-model="activeTab" :tabs="tabs">
           <template #default="{ activeTab }">
@@ -370,7 +370,7 @@ const getRatingPercentage = (rating: number) => {
 
                     <div class="flex flex-wrap items-center gap-3 sm:gap-6 font-mono text-[10px] sm:text-xs text-ink-muted">
                       <span class="hidden sm:inline">{{ chapter.wordCount }} words</span>
-                      <span class="italic font-medium">{{ chapter.translatorGroup || 'Rano Group' }}</span>
+                      <span class="italic font-medium">{{ chapter.translatorGroup || 'Malaz Scans' }}</span>
                       <NuxtLink 
                         :to="`/read/${chapter.id}`"
                         class="px-2 py-0.5 border border-ink hover:bg-ink hover:text-paper text-[10px] uppercase font-bold"
@@ -537,7 +537,7 @@ const getRatingPercentage = (rating: number) => {
           <component
             :is="AsyncTextarea"
             v-model="userRating.reviewText"
-            placeholder="Document your editorial findings and review remarks here..."
+            placeholder="Document your curated findings and review remarks here..."
             :rows="4"
           />
         </div>

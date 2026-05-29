@@ -74,8 +74,8 @@ export default defineEventHandler(async (event) => {
     const mentionUsernames = extractMentions(body.content)
     const mentionedProfiles = await findProfilesByUsernames(tx, mentionUsernames)
     await createNotificationsForUsers(tx, mentionedProfiles
-      .filter(profile => profile.id !== user.profileId)
-      .map(profile => ({
+      .filter((profile: any) => profile.id !== user.profileId)
+      .map((profile: any) => ({
         recipientId: profile.id,
         actorId: user.profileId,
         type: 'forum_mention',

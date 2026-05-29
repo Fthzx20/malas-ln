@@ -11,11 +11,13 @@
  */
 export function getErrorStatusCode(error: unknown): number | null {
   if (!error || typeof error !== 'object') return null
-  const c = error as { statusCode?: unknown; status?: unknown; data?: { statusCode?: unknown } }
+  const c = error as { statusCode?: unknown; status?: unknown; data?: { statusCode?: unknown }; response?: { status?: unknown } }
   // Check body data first (consistent with server-side createError data field)
   if (typeof c.data?.statusCode === 'number') return c.data.statusCode
   if (typeof c.statusCode === 'number') return c.statusCode
   if (typeof c.status === 'number') return c.status
+  // Check `$fetch` response object
+  if (c.response && typeof c.response.status === 'number') return c.response.status
   return null
 }
 

@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     const [report] = await db
       .insert(reports)
       .values({
-        reporterId: user.profileId,
+        reporterId: user.profileId as string,
         targetType: body.targetType,
         targetId: body.targetId,
         reason: body.reason,

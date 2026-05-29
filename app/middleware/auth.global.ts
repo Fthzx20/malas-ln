@@ -21,10 +21,33 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const authRoute = /^\/auth\/(login|register|confirm)(\/|$)/.test(to.path)
 
   const activeUser = supabaseUser?.value
-  const { data: { session } } = await supabase.auth.getSession()
-  const accessToken = session?.access_token
+  let accessToken: string | undefined
 
-  if (authRoute && activeUser) {
+  if (activeUser) {
+    if (!authStore.profile || authStore.profile.authId !== activeUser.id) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        accessToken = session?.access_token
+        await authStore.fetchProfile(accessToken)
+      } catch (error) {
+        // If it's a known auth error, clear the profile
+        authStore.clearProfile()
+        
+        // CRITICAL FIX: If profile doesn't exist but Supabase thinks we are logged in,
+        // it means the DB profile was deleted or out of sync. 
+        // We MUST force sign out from Supabase so the user isn't trapped in a limbo state.
+        if (import.meta.client) {
+           await supabase.auth.signOut()
+        }
+        
+        if (protectedRoute) {
+          return navigateTo({ path: '/auth/login', query: { redirect: to.fullPath } })
+        }
+      }
+    }
+  }
+
+  if (authRoute && activeUser && authStore.profile) {
     return navigateTo('/')
   }
 
@@ -32,24 +55,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  if (!activeUser) {
-    return navigateTo({ path: '/auth/login', query: { redirect: to.fullPath } })
-  }
-
-  if (!authStore.profile || authStore.profile.authId !== activeUser.id) {
-    try {
-      await authStore.fetchProfile(accessToken)
-    } catch (error) {
-      if (isAuthError(error)) {
-        authStore.clearProfile()
-        return navigateTo({ path: '/auth/login', query: { redirect: to.fullPath } })
-      }
-
-      return
-    }
-  }
-
-  if (!authStore.profile) {
+  if (!activeUser || !authStore.profile) {
     return navigateTo({ path: '/auth/login', query: { redirect: to.fullPath } })
   }
 

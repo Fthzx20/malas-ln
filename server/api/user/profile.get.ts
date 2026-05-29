@@ -16,12 +16,56 @@ function getEmailPrefix(email: string) {
   return normalizeUsername(localPart)
 }
 
-export default defineEventHandler(async (event) => {
-  let user
+function decodeSupabaseJwt(token: string): { id: string; email: string; metadata: Record<string, unknown> } | null {
   try {
-    user = await requireAuth(event)
-  } catch (_err) {
-    throwApiError(401, 'Authentication required')
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+
+    const payload = JSON.parse(Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')) as {
+      sub?: unknown
+      aud?: unknown
+      email?: unknown
+      user_metadata?: unknown
+      exp?: unknown
+    }
+
+    if (payload.aud !== 'authenticated') return null
+    if (typeof payload.sub !== 'string' || !payload.sub) return null
+    if (typeof payload.email !== 'string' || !payload.email) return null
+    if (typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()) return null
+
+    return {
+      id: payload.sub,
+      email: payload.email,
+      metadata: payload.user_metadata && typeof payload.user_metadata === 'object' && !Array.isArray(payload.user_metadata)
+        ? payload.user_metadata as Record<string, unknown>
+        : {},
+    }
+  } catch {
+    return null
+  }
+}
+
+async function resolveProfileRequestUser(event: Parameters<typeof defineEventHandler>[0]) {
+  const rawAuthorization =
+    event.node?.req?.headers?.authorization ||
+    event.node?.req?.headers?.Authorization ||
+    null
+
+  if (typeof rawAuthorization === 'string' && rawAuthorization.startsWith('Bearer ')) {
+    const decoded = decodeSupabaseJwt(rawAuthorization.slice('Bearer '.length).trim())
+    if (decoded) {
+      return decoded
+    }
+  }
+
+  return null
+}
+
+export default defineEventHandler(async (event) => {
+  const user = await resolveProfileRequestUser(event)
+  if (!user) {
+    return { authenticated: false, user: null }
   }
   const db = useDB()
 
@@ -30,14 +74,7 @@ export default defineEventHandler(async (event) => {
   })
 
   if (!profile) {
-    let metadata: any = {}
-    try {
-      if (typeof serverSupabaseUser !== 'undefined') {
-        metadata = (await serverSupabaseUser(event))?.user_metadata || {}
-      }
-    } catch (e) {
-      metadata = {}
-    }
+    const metadata = (user.metadata ?? {}) as Record<string, unknown>
     const preferredUsername = typeof metadata.username === 'string' ? metadata.username : ''
     const preferredDisplayName = typeof metadata.displayName === 'string'
       ? metadata.displayName

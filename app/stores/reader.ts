@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export type AmbientTheme = 'day' | 'night' | 'sepia' | 'editorial'
+export type AmbientTheme = 'day' | 'night' | 'sepia' | 'curated'
 export type ReaderFont = 'Lora' | 'Inter' | 'JetBrains Mono'
 
 interface ReaderState {
