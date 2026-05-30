@@ -89,11 +89,6 @@ const userRating = ref({
   reviewText: '',
 })
 
-// Lazy-load heavier UI widgets used only inside modals
-const AsyncStarRating = defineAsyncComponent(() => import('~/components/ui/UiStarRating.vue'))
-const AsyncTextarea = defineAsyncComponent(() => import('~/components/ui/UiTextarea.vue'))
-const AsyncModal = defineAsyncComponent(() => import('~/components/ui/UiModal.vue'))
-
 const isSubmittingRating = ref(false)
 const submitRating = async () => {
   if (!authStore.isAuthenticated) return
@@ -412,7 +407,6 @@ const getRatingPercentage = (rating: number) => {
                       width="200"
                       height="280"
                       class="w-full h-full object-cover"
-                      loading="lazy"
                     />
                   </div>
                   <h4 class="font-heading text-lg font-black mb-1">Volume {{ volume.volumeNumber }}</h4>
@@ -512,30 +506,29 @@ const getRatingPercentage = (rating: number) => {
     </div>
 
     <!-- Rating modal overlay -->
-    <component :is="AsyncModal" v-model:open="isRatingModalOpen" title="Manuscript Evaluation Form">
+    <LazyUiModal v-model:open="isRatingModalOpen" title="Manuscript Evaluation Form">
       <form @submit.prevent="submitRating" class="space-y-4 font-mono text-xs">
         <div>
           <label class="block uppercase font-bold text-ink-muted mb-1">Overall Critique Score (1-5)</label>
-          <component :is="AsyncStarRating" v-model="userRating.overall" />
+          <UiStarRating v-model="userRating.overall" />
         </div>
         <div class="grid grid-cols-3 gap-4">
           <div>
             <label class="block uppercase font-bold text-ink-muted mb-1">Story</label>
-            <component :is="AsyncStarRating" v-model="userRating.story" size="sm" />
+            <UiStarRating v-model="userRating.story" size="sm" />
           </div>
           <div>
             <label class="block uppercase font-bold text-ink-muted mb-1">Translation</label>
-            <component :is="AsyncStarRating" v-model="userRating.translation" size="sm" />
+            <UiStarRating v-model="userRating.translation" size="sm" />
           </div>
           <div>
             <label class="block uppercase font-bold text-ink-muted mb-1">Characters</label>
-            <component :is="AsyncStarRating" v-model="userRating.characters" size="sm" />
+            <UiStarRating v-model="userRating.characters" size="sm" />
           </div>
         </div>
         <div>
           <label class="block uppercase font-bold text-ink-muted mb-1">Written Critique Log (Optional)</label>
-          <component
-            :is="AsyncTextarea"
+          <UiTextarea
             v-model="userRating.reviewText"
             placeholder="Document your curated findings and review remarks here..."
             :rows="4"
@@ -559,6 +552,6 @@ const getRatingPercentage = (rating: number) => {
           </UiButton>
         </div>
       </form>
-    </component>
+    </LazyUiModal>
   </div>
 </template>

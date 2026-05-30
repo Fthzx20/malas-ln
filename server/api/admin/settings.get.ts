@@ -1,12 +1,8 @@
 import { siteSettings } from '@@/server/database/schema'
 import { throwApiError } from '@@/server/utils/errors'
 
-export default defineCachedEventHandler(async (event) => {
-  // Ensure user is admin
-  const user = event.context.user
-  if (!user || user.role !== 'admin') {
-    throwApiError(403, 'Unauthorized. Admin access required.')
-  }
+export default defineEventHandler(async (event) => {
+  await requireRole(event, 'admin')
 
   const db = useDB()
   
@@ -37,8 +33,4 @@ export default defineCachedEventHandler(async (event) => {
   }
 
   return { settings: groupedSettings }
-}, {
-  maxAge: 60,
-  staleMaxAge: 30,
-  swr: true,
 })

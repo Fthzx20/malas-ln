@@ -48,9 +48,6 @@ const handlePostReply = async () => {
   }
 }
 
-const AsyncTextarea = defineAsyncComponent(() => import('~/components/ui/UiTextarea.vue'))
-const AsyncAvatar = defineAsyncComponent(() => import('~/components/ui/UiAvatar.vue'))
-
 useHead(() => {
   if (!threadData.value?.post) return {}
   return {
@@ -101,7 +98,7 @@ useHead(() => {
 
         <!-- Author Dateline -->
         <div class="flex items-center gap-4 text-xs font-mono text-ink-muted mb-6 border-y border-rule py-2">
-          <component :is="AsyncAvatar" :src="threadData.post.user.avatarUrl || ''" :name="threadData.post.user.displayName" size="sm" class="border border-ink" />
+          <UiAvatar :src="threadData.post.user.avatarUrl || ''" :name="threadData.post.user.displayName" size="sm" class="border border-ink" />
           <div class="flex flex-wrap items-baseline gap-2">
             <span>By <strong class="text-ink font-semibold">{{ threadData.post.user.displayName }}</strong></span>
             <span class="px-1.5 py-0.5 bg-ink text-paper text-[8px] uppercase tracking-wider font-bold">{{ threadData.post.user.role }}</span>
@@ -131,7 +128,7 @@ useHead(() => {
             class="border border-rule bg-surface p-4 sm:p-5 flex gap-4"
           >
             <!-- Replier Avatar -->
-            <component :is="AsyncAvatar" :src="reply.user.avatarUrl || ''" :name="reply.user.displayName" size="md" class="border border-rule shrink-0" />
+            <UiAvatar :src="reply.user.avatarUrl || ''" :name="reply.user.displayName" size="md" class="border border-rule shrink-0" />
 
             <div class="flex-1 space-y-2">
               <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule pb-1.5 text-xs font-mono text-ink-muted">
@@ -162,8 +159,7 @@ useHead(() => {
         </div>
 
         <form v-if="authStore.isAuthenticated" @submit.prevent="handlePostReply" class="space-y-4 font-mono text-xs">
-          <component
-            :is="AsyncTextarea"
+          <UiTextarea
             v-model="replyContent"
             placeholder="Commit your discussion reply manuscript here..."
             :rows="4"

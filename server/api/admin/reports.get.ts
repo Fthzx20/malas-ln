@@ -1,7 +1,7 @@
 import { reports, profiles, comments, forumPosts } from '@@/server/database/schema'
 import { eq, desc, sql, inArray } from 'drizzle-orm'
 
-export default defineCachedEventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
   const db = useDB()
   const query = getQuery(event)
@@ -79,14 +79,4 @@ export default defineCachedEventHandler(async (event) => {
       total: Number(countResult?.count || 0),
     },
   }
-}, {
-  maxAge: 15,
-  staleMaxAge: 15,
-  swr: true,
-  getKey: (event) => {
-    const query = getQuery(event)
-    const status = (query.status as string) || 'pending'
-    const page = Math.max(1, parseInt(query.page as string) || 1)
-    return `admin:reports:${status}:${page}`
-  },
 })

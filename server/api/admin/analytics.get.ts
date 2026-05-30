@@ -1,7 +1,7 @@
 import { novels, profiles, readingHistory, bookmarks, chapters, comments, reports } from '@@/server/database/schema'
 import { sql, desc, eq } from 'drizzle-orm'
 
-export default defineCachedEventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
 
   return await withDB(async (db) => {
@@ -91,8 +91,4 @@ export default defineCachedEventHandler(async (event) => {
       recentReports,
     }
   })
-}, {
-  maxAge: 30,
-  staleMaxAge: 30,
-  swr: true,
 })

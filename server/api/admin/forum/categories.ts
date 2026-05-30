@@ -2,11 +2,8 @@ import { forumCategories } from '@@/server/database/schema'
 import { throwApiError } from '@@/server/utils/errors'
 import { eq } from 'drizzle-orm'
 
-export default defineCachedEventHandler(async (event) => {
-  const user = event.context.user
-  if (!user || user.role !== 'admin') {
-    throwApiError(403, 'Unauthorized. Admin access required.')
-  }
+export default defineEventHandler(async (event) => {
+  await requireRole(event, 'admin')
 
   const db = useDB()
   const method = event.method
@@ -55,8 +52,4 @@ export default defineCachedEventHandler(async (event) => {
   }
 
   throwApiError(405, 'Method not allowed')
-}, {
-  maxAge: 120,
-  staleMaxAge: 60,
-  swr: true,
 })

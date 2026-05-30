@@ -150,11 +150,7 @@ const openIllustrationPreview = (src: string, alt: string) => {
   isPreviewOpen.value = true
 }
 
-// Modal: load client-only modal as async component to reduce SSR bundle
-const AsyncModal = defineAsyncComponent(() => import('~/components/ui/UiModal.vue'))
 
-// Lazy-load avatar component in comments to reduce initial bundle weight
-const AsyncAvatar = defineAsyncComponent(() => import('~/components/ui/UiAvatar.vue'))
 
 // Setup intersection observers or intercept click on parsed footnote anchors and illustrations
 const interceptReadingClicks = (e: MouseEvent) => {
@@ -613,6 +609,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
             <NuxtLink 
               v-if="chapterDetails.navigation.prev" 
               :to="`/read/${chapterDetails.navigation.prev.id}`"
+              :prefetch="true"
               class="touch-target px-4 py-2 border hover:bg-accent hover:text-white transition-colors flex items-center gap-1"
               :style="{ borderColor: 'var(--reader-rule)', color: 'var(--reader-text)' }"
             >
@@ -633,6 +630,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
             <NuxtLink 
               v-if="chapterDetails.navigation.next" 
               :to="`/read/${chapterDetails.navigation.next.id}`"
+              :prefetch="true"
               class="touch-target px-4 py-2 border hover:bg-accent hover:text-white transition-colors flex items-center gap-1"
               :style="{ borderColor: 'var(--reader-rule)', color: 'var(--reader-text)' }"
             >
@@ -660,7 +658,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
             <div v-for="comment in comments" :key="comment.id" class="border border-rule bg-surface p-4">
               <div class="flex items-start gap-3">
                 <div class="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                  <component :is="AsyncAvatar" v-if="comment.user" :src="comment.user.avatarUrl || ''" :name="comment.user.displayName || comment.user.username" size="sm" />
+                  <UiAvatar v-if="comment.user" :src="comment.user.avatarUrl || ''" :name="comment.user.displayName || comment.user.username" size="sm" />
                   <div v-else class="w-8 h-8 bg-ink-faint flex items-center justify-center text-xs font-bold text-paper">{{ (comment.user?.displayName || comment.user?.username || 'U').charAt(0).toUpperCase() }}</div>
                 </div>
                 <div class="flex-1">
@@ -684,7 +682,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
                   <div v-if="comment.replies?.length" class="mt-3 pl-4 border-l border-rule space-y-3">
                     <div v-for="r in comment.replies" :key="r.id" class="text-sm flex gap-3 items-start">
                       <div class="w-7 h-7 rounded-full overflow-hidden shrink-0">
-                        <component :is="AsyncAvatar" v-if="r.user" :src="r.user.avatarUrl || ''" :name="r.user.displayName || r.user.username" size="sm" />
+                        <UiAvatar v-if="r.user" :src="r.user.avatarUrl || ''" :name="r.user.displayName || r.user.username" size="sm" />
                         <div v-else class="w-7 h-7 bg-ink-faint flex items-center justify-center text-xs font-bold text-paper">{{ (r.user?.displayName || r.user?.username || 'U').charAt(0).toUpperCase() }}</div>
                       </div>
                       <div class="flex-1">
@@ -742,7 +740,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
     </article>
 
     <!-- ===== FOOTNOTE DRAWER OVERLAY (POPUP TOOLTIP) ===== -->
-    <component :is="AsyncModal" v-model:open="isFootnoteOpen" :title="`Footnote Reference`">
+    <UiModal v-model:open="isFootnoteOpen" :title="`Footnote Reference`">
       <div v-if="activeFootnote" class="font-mono text-xs space-y-3">
         <p class="font-bold text-accent text-sm">Annotation [{{ activeFootnote.marker }}]:</p>
         <p class="leading-relaxed font-body text-sm text-ink-light">
@@ -752,7 +750,7 @@ const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent
           <UiButton variant="primary" @click="isFootnoteOpen = false">Resume Reading</UiButton>
         </div>
       </div>
-    </component>
+    </UiModal>
 
     <!-- ===== IMMERSIVE FULL-SCREEN ILLUSTRATION PREVIEW OVERLAY ===== -->
     <Transition name="fade">

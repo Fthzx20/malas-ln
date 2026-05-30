@@ -48,12 +48,17 @@ async function resolveAuthUser(event: H3Event): Promise<AuthUser | null> {
     }
 
     // Fallback: check Authorization header Bearer token (less common but supported)
-    const authorization =
+    let authorization =
       getHeader(event, 'authorization') ||
       getHeader(event, 'Authorization') ||
       event.node?.req?.headers?.authorization ||
       event.node?.req?.headers?.Authorization
-    if (authorization?.startsWith('Bearer ')) {
+
+    if (Array.isArray(authorization)) {
+      authorization = authorization[0]
+    }
+
+    if (typeof authorization === 'string' && authorization.startsWith('Bearer ')) {
       const token = authorization.slice('Bearer '.length).trim()
       if (token) {
         const decoded = decodeSupabaseJwt(token)
@@ -84,7 +89,7 @@ async function resolveAuthUser(event: H3Event): Promise<AuthUser | null> {
 function decodeSupabaseJwt(token: string): { id: string; email: string; metadata: Record<string, unknown> } | null {
   try {
     const parts = token.split('.')
-    if (parts.length !== 3) return null
+    if (parts.length !== 3 || !parts[1]) return null
 
     const payload = JSON.parse(Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')) as {
       sub?: unknown

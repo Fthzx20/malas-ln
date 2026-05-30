@@ -27,24 +27,19 @@ useHead(computed(() => ({
   }] : [],
 })))
 
-// Fetch latest releases (latest novels/chapters) — lazy, client-only
+// Fetch latest releases (latest novels/chapters)
 const { data: latestNovels, refresh: refreshLatest } = useFetch('/api/novels', {
   query: { sort: 'latest', limit: 8 },
-  lazy: true,
 })
 
-// Fetch trending novels — lazy, client-only (load when sidebar appears)
+// Fetch trending novels
 const { data: trendingNovels, refresh: refreshTrending } = useFetch('/api/novels', {
   query: { sort: 'popular', limit: 5 },
-  lazy: true,
 })
 
-const { data: topContribData, refresh: refreshTopContrib } = useFetch('/api/profiles/top-contributor', {
-  lazy: true,
-})
+const { data: topContribData, refresh: refreshTopContrib } = useFetch('/api/profiles/top-contributor')
 
 const sidebarRef = ref<HTMLElement | null>(null)
-let _sidebarObserver: IntersectionObserver | null = null
 
 const contributorsList = computed(() => {
   const remote = topContribData.value as any
@@ -57,9 +52,6 @@ const contributorsList = computed(() => {
 
 const libraryStore = useLibraryStore()
 const isClientReady = ref(false)
-
-// Lazy-load small avatar in sidebar contributors list
-const AsyncAvatar = defineAsyncComponent(() => import('~/components/ui/UiAvatar.vue'))
 
 const resumeReading = computed(() => {
   const localEntry = libraryStore.localHistory[0] ?? null
@@ -180,28 +172,6 @@ onMounted(() => {
     startHeroTimer()
   }
 
-  // Observe sidebar and only load non-critical widgets when they come into view
-  try {
-    _sidebarObserver = new IntersectionObserver((entries) => {
-      if (!entries || entries.length === 0) return
-      const entry = entries[0] ?? null
-      if (!entry) return
-      if (entry.isIntersecting) {
-        // load trending and contributors once
-        try { refreshTrending() } catch (_) {}
-        try { refreshTopContrib() } catch (_) {}
-        _sidebarObserver?.disconnect()
-        _sidebarObserver = null
-      }
-    }, { rootMargin: '400px' })
-
-    if (sidebarRef.value) _sidebarObserver.observe(sidebarRef.value)
-  } catch (e) {
-    // ignore if IntersectionObserver not available
-    try { refreshTrending() } catch (_) {}
-    try { refreshTopContrib() } catch (_) {}
-  }
-
   // Pause hero auto-flip while tab is hidden to save CPU/battery
   _visibilityHandler = () => {
     if (typeof document === 'undefined') return
@@ -217,10 +187,6 @@ onUnmounted(() => {
     document.removeEventListener('visibilitychange', _visibilityHandler)
     _visibilityHandler = null
   }
-    if (_sidebarObserver) {
-      _sidebarObserver.disconnect()
-      _sidebarObserver = null
-    }
 })
 
 const genres = computed(() => {
@@ -404,7 +370,6 @@ const genres = computed(() => {
                     :alt="`Cover for ${novel.title}`"
                     width="200"
                     height="280"
-                    loading="lazy"
                     class="w-full h-full object-cover"
                   />
                   <div v-else class="w-full h-full flex items-center justify-center bg-surface-sunken text-ink-faint">
@@ -583,7 +548,7 @@ const genres = computed(() => {
               :key="contributor.id"
               class="flex items-center gap-3 rounded-none border border-rule bg-paper p-2.5 sm:p-3"
             >
-              <component :is="AsyncAvatar"
+              <UiAvatar
                 :src="contributor.avatarUrl || undefined"
                 :name="contributor.username"
                 :alt="`${contributor.username} profile avatar`"

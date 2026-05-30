@@ -3,10 +3,7 @@ import { throwApiError } from '@@/server/utils/errors'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.user
-  if (!user || user.role !== 'admin') {
-    throwApiError(403, 'Unauthorized. Admin access required.')
-  }
+  await requireRole(event, 'admin')
 
   const body = await readBody(event)
   if (!body || typeof body !== 'object') {

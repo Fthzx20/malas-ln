@@ -12,7 +12,7 @@ import {
   bookmarks,
 } from '@@/server/database/schema'
 
-export default defineCachedEventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
 
   const db = useDB()
@@ -53,8 +53,4 @@ export default defineCachedEventHandler(async (event) => {
   }
 
   return { counts }
-}, {
-  maxAge: 30,
-  staleMaxAge: 30,
-  swr: true,
 })
