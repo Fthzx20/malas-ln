@@ -1,30 +1,45 @@
 import { forumCategories } from '@@/server/database/schema'
 import { throwApiError } from '@@/server/utils/errors'
 import { eq } from 'drizzle-orm'
+import { withDB } from '@@/server/utils/db'
+import { getAdminCache, setAdminCache, invalidateAdminCachePrefix } from '@@/server/utils/admin-cache'
 
 export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
 
-  const db = useDB()
   const method = event.method
 
   if (method === 'GET') {
-    const categories = await db.query.forumCategories.findMany({
-      orderBy: (c, { asc }) => [asc(c.sortOrder)],
+    const cacheKey = 'admin:forum:categories:v1'
+    const cached = getAdminCache<{ categories: any[] }>(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    const response = await withDB(async (db) => {
+      const categories = await db.query.forumCategories.findMany({
+        orderBy: (c, { asc }) => [asc(c.sortOrder)],
+      })
+      return { categories }
     })
-    return { categories }
+
+    setAdminCache(cacheKey, response, 15000)
+    return response
   }
 
   if (method === 'POST') {
     const body = await readBody(event)
     if (!body.name || !body.slug) throwApiError(400, 'Name and slug are required')
-    
-    const [inserted] = await db.insert(forumCategories).values({
-      name: body.name,
-      slug: body.slug,
-      description: body.description || '',
-      sortOrder: body.sortOrder || 0
-    }).returning()
+    const inserted = await withDB(async (db) => {
+      const [row] = await db.insert(forumCategories).values({
+        name: body.name,
+        slug: body.slug,
+        description: body.description || '',
+        sortOrder: body.sortOrder || 0
+      }).returning()
+      return row
+    })
+    invalidateAdminCachePrefix('admin:forum:categories')
     
     return { category: inserted }
   }
@@ -32,13 +47,16 @@ export default defineEventHandler(async (event) => {
   if (method === 'PUT') {
     const body = await readBody(event)
     if (!body.id) throwApiError(400, 'Category ID is required')
-    
-    const [updated] = await db.update(forumCategories).set({
-      name: body.name,
-      slug: body.slug,
-      description: body.description,
-      sortOrder: body.sortOrder
-    }).where(eq(forumCategories.id, body.id)).returning()
+    const updated = await withDB(async (db) => {
+      const [row] = await db.update(forumCategories).set({
+        name: body.name,
+        slug: body.slug,
+        description: body.description,
+        sortOrder: body.sortOrder
+      }).where(eq(forumCategories.id, body.id)).returning()
+      return row
+    })
+    invalidateAdminCachePrefix('admin:forum:categories')
     
     return { category: updated }
   }
@@ -46,8 +64,12 @@ export default defineEventHandler(async (event) => {
   if (method === 'DELETE') {
     const body = await readBody(event)
     if (!body.id) throwApiError(400, 'Category ID is required')
-    
-    await db.delete(forumCategories).where(eq(forumCategories.id, body.id))
+
+    await withDB(async (db) => {
+      await db.delete(forumCategories).where(eq(forumCategories.id, body.id))
+      return true
+    })
+    invalidateAdminCachePrefix('admin:forum:categories')
     return { success: true }
   }
 

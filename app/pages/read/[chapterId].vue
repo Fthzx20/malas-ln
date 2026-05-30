@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { marked } from 'marked'
 import { useReaderStore } from '~/stores/reader'
 import { useLibraryStore } from '~/stores/library'
@@ -12,23 +12,19 @@ definePageMeta({
 })
 
 const route = useRoute()
-const router = useRouter()
 const readerStore = useReaderStore()
 const libraryStore = useLibraryStore()
 const authStore = useAuthStore()
 const toast = useToast()
 const chapterId = computed(() => route.params.chapterId as string)
 
-// States for network
-const chapterDataRef = ref<any>(null)
-
 // Fetch chapter details with relations and navigation helpers (reactively watch computed URL ref)
 const chapterUrl = computed(() => `/api/chapters/${chapterId.value}`)
-const { data: networkChapter, pending: networkPending, error: networkError, refresh: refreshChapter } = await useFetch(chapterUrl)
+const { data: networkChapter, pending: networkPending, error: networkError } = await useFetch(chapterUrl)
 
 // Computed details, pending, and error mapping
-const chapterDetails = computed(() => chapterDataRef.value || networkChapter.value)
-const isPending = computed(() => networkPending.value && !chapterDataRef.value)
+const chapterDetails = computed(() => networkChapter.value)
+const isPending = computed(() => networkPending.value)
 const isError = computed(() => networkError.value && !chapterDetails.value)
 const isChapterUnavailable = computed(() => {
   const statusCode = (networkError.value as any)?.statusCode || (networkError.value as any)?.status || 0
@@ -190,6 +186,25 @@ const handleGlobalKeyDown = (event: KeyboardEvent) => {
   }
 }
 
+let commentsLoadHandle: number | null = null
+
+const scheduleInitialCommentsLoad = () => {
+  if (typeof window === 'undefined') return
+
+  if ('requestIdleCallback' in window) {
+    commentsLoadHandle = (window as any).requestIdleCallback(() => {
+      commentsLoadHandle = null
+      void fetchComments()
+    }, { timeout: 1200 })
+    return
+  }
+
+  commentsLoadHandle = window.setTimeout(() => {
+    commentsLoadHandle = null
+    void fetchComments()
+  }, 0)
+}
+
 onMounted(async () => {
   window.addEventListener('keydown', handleGlobalKeyDown)
   window.addEventListener('beforeunload', flushProgress)
@@ -199,6 +214,8 @@ onMounted(async () => {
   if (chapterDetails.value?.chapter) {
     libraryStore.markChapterRead(chapterId.value)
   }
+
+  scheduleInitialCommentsLoad()
 })
 
 const hasRestoredScroll = ref(false)
@@ -219,6 +236,14 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalKeyDown)
   window.removeEventListener('beforeunload', flushProgress)
   window.removeEventListener('pagehide', flushProgress)
+  if (commentsLoadHandle !== null) {
+    if (typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+      ;(window as any).cancelIdleCallback(commentsLoadHandle)
+    } else {
+      clearTimeout(commentsLoadHandle)
+    }
+    commentsLoadHandle = null
+  }
   if (saveTimeout) clearTimeout(saveTimeout)
 })
 
@@ -227,7 +252,6 @@ watch(() => route.params.chapterId, () => {
   isSettingsOpen.value = false
   activeFootnote.value = null
   isFootnoteOpen.value = false
-  chapterDataRef.value = null
   hasRestoredScroll.value = false
 })
 

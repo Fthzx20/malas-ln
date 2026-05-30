@@ -29,6 +29,22 @@ const cropNaturalHeight = ref(0)
 const cropBaseScale = ref(1)
 const cropDragging = ref(false)
 
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
+
 let cropResizeObserver: ResizeObserver | null = null
 let cropDragOrigin = { x: 0, y: 0, panX: 0, panY: 0 }
 
@@ -205,6 +221,7 @@ const handleAvatarUpload = async (event: Event) => {
   }
 
   pendingAvatarFile.value = file
+  avatarFileName.value = file.name
   revokePendingAvatar()
   pendingAvatarObjectUrl.value = URL.createObjectURL(file)
   avatarPreviewUrl.value = pendingAvatarObjectUrl.value
@@ -318,18 +335,26 @@ const confirmAvatarCrop = async () => {
     formData.append('image', croppedFile)
 
     const headers = await authStore.getAuthHeaders().catch(() => undefined)
-    const response = await $fetch<{ url: string }>('/api/user/avatar', {
-      method: 'POST',
-      body: formData,
-      headers,
-    })
+    const response = await withTimeout(
+      $fetch<{ url: string }>('/api/user/avatar', {
+        method: 'POST',
+        body: formData,
+        headers,
+      }),
+      20000,
+      'Avatar upload timed out. Please try again.',
+    )
 
     // Ensure the upload call includes auth headers if available
     // (some runtimes may not automatically include cookies in fetch)
 
     avatarUrl.value = response.url
     avatarPreviewUrl.value = response.url
-    const updatedProfile = await authStore.updateProfile({ avatarUrl: response.url })
+    const updatedProfile = await withTimeout(
+      authStore.updateProfile({ avatarUrl: response.url }),
+      15000,
+      'Avatar saved to storage, but profile update timed out. Please retry.',
+    )
     if (updatedProfile?.avatarUrl) {
       avatarUrl.value = updatedProfile.avatarUrl
       avatarPreviewUrl.value = updatedProfile.avatarUrl

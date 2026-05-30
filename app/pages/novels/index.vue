@@ -156,6 +156,7 @@ try {
 
 const { data: novelsData, pending, refresh } = await useFetch('/api/novels', {
   query: () => fetchParams.value,
+  lazy: true,
 })
 
 // Secondary data — non-blocking

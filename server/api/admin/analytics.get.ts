@@ -1,10 +1,17 @@
 import { novels, profiles, readingHistory, bookmarks, chapters, comments, reports } from '@@/server/database/schema'
 import { sql, desc, eq } from 'drizzle-orm'
+import { getAdminCache, setAdminCache } from '@@/server/utils/admin-cache'
 
 export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
 
-  return await withDB(async (db) => {
+  const cacheKey = 'admin:analytics:v1'
+  const cached = getAdminCache<any>(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const response = await withDB(async (db) => {
     // 1. Basic counts using optimized count queries (parallel)
     const [
       [novelCount],
@@ -91,4 +98,7 @@ export default defineEventHandler(async (event) => {
       recentReports,
     }
   })
+
+  setAdminCache(cacheKey, response, 10000)
+  return response
 })

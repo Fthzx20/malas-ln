@@ -30,6 +30,7 @@ export const profiles = pgTable('profiles', {
 }, (table) => [
   uniqueIndex('profiles_auth_id_idx').on(table.authId),
   uniqueIndex('profiles_username_idx').on(table.username),
+  index('profiles_role_created_idx').on(table.role, table.createdAt),
 ])
 
 /* ============================================================
@@ -61,6 +62,9 @@ export const novels = pgTable('novels', {
   index('novels_status_idx').on(table.status),
   index('novels_featured_idx').on(table.isFeatured),
   index('novels_year_idx').on(table.year),
+  index('novels_updated_at_idx').on(table.updatedAt),
+  index('novels_rating_count_idx').on(table.ratingCount),
+  index('novels_avg_rating_idx').on(table.avgRating),
 ])
 
 /* ============================================================
@@ -100,6 +104,7 @@ export const chapters = pgTable('chapters', {
   index('chapters_volume_id_idx').on(table.volumeId),
   index('chapters_published_idx').on(table.isPublished),
   index('chapters_publish_at_idx').on(table.publishAt),
+  index('chapters_novel_published_number_idx').on(table.novelId, table.isPublished, table.chapterNumber),
 ])
 
 /* ============================================================
@@ -150,6 +155,7 @@ export const ratings = pgTable('ratings', {
 }, (table) => [
   uniqueIndex('ratings_user_novel_idx').on(table.userId, table.novelId),
   index('ratings_novel_id_idx').on(table.novelId),
+  index('ratings_novel_overall_idx').on(table.novelId, table.overall),
 ])
 
 /* ============================================================
@@ -246,6 +252,7 @@ export const forumPosts = pgTable('forum_posts', {
   index('forum_posts_category_idx').on(table.categoryId),
   index('forum_posts_user_idx').on(table.userId),
   index('forum_posts_pinned_idx').on(table.isPinned),
+  index('forum_posts_category_flagged_pinned_updated_idx').on(table.categoryId, table.isFlagged, table.isPinned, table.updatedAt),
 ])
 
 export const forumReplies = pgTable('forum_replies', {
@@ -258,6 +265,7 @@ export const forumReplies = pgTable('forum_replies', {
 }, (table) => [
   index('forum_replies_post_idx').on(table.postId),
   index('forum_replies_user_idx').on(table.userId),
+  index('forum_replies_post_flagged_created_idx').on(table.postId, table.isFlagged, table.createdAt),
 ])
 
 /* ============================================================
@@ -276,6 +284,7 @@ export const reports = pgTable('reports', {
 }, (table) => [
   index('reports_status_idx').on(table.status),
   index('reports_reporter_idx').on(table.reporterId),
+  index('reports_status_created_idx').on(table.status, table.createdAt),
 ])
 
 /* ============================================================
@@ -291,4 +300,5 @@ export const readingHistory = pgTable('reading_history', {
 }, (table) => [
   index('reading_history_user_idx').on(table.userId),
   index('reading_history_novel_idx').on(table.novelId),
+  index('reading_history_read_at_user_idx').on(table.readAt, table.userId),
 ])

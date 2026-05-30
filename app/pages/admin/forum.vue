@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, defineAsyncComponent } from 'vue'
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
@@ -19,8 +19,33 @@ interface Category {
   sortOrder: number
 }
 
-const categories = ref<Category[]>([])
-const isLoading = ref(true)
+const getAdminHeaders = () => authStore.getAuthHeaders().then(headers => headers || {})
+
+const {
+  data: categoriesData,
+  pending: isLoading,
+  refresh: refreshCategories,
+  error: categoriesError,
+} = await useAsyncData(
+  'admin-forum-categories',
+  async () => {
+    const headers = await getAdminHeaders()
+    const response = await $fetch<{ categories: Category[] }>('/api/admin/forum/categories', { headers })
+    return response?.categories || []
+  },
+  {
+    default: () => [],
+    lazy: false,
+  },
+)
+
+const categories = computed(() => categoriesData.value || [])
+
+watch(categoriesError, (err) => {
+  if (err) {
+    toast.error('Failed to load categories')
+  }
+})
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -32,19 +57,6 @@ const form = ref<Partial<Category>>({
   description: '',
   sortOrder: 0
 })
-
-const loadCategories = async () => {
-  isLoading.value = true
-  try {
-    const headers = await authStore.getAuthHeaders()
-    const response = await $fetch<{ categories: Category[] }>('/api/admin/forum/categories', { headers })
-    categories.value = response?.categories || []
-  } catch (err) {
-    toast.error('Failed to load categories')
-  } finally {
-    isLoading.value = false
-  }
-}
 
 const openCreateModal = () => {
   isEditing.value = false
@@ -72,7 +84,7 @@ const openEditModal = (cat: Category) => {
 const saveCategory = async () => {
   isSaving.value = true
   try {
-    const headers = await authStore.getAuthHeaders()
+    const headers = await getAdminHeaders()
     const method = isEditing.value ? 'PUT' : 'POST'
     
     await $fetch('/api/admin/forum/categories', {
@@ -83,7 +95,7 @@ const saveCategory = async () => {
     
     toast.success(`Category ${isEditing.value ? 'updated' : 'created'} successfully`)
     showModal.value = false
-    void loadCategories()
+    await refreshCategories()
   } catch (err: any) {
     toast.error(err.data?.message || 'Failed to save category')
   } finally {
@@ -95,22 +107,18 @@ const deleteCategory = async (id: string) => {
   if (!confirm('Are you sure you want to delete this category? This will delete all posts and replies inside it!')) return
   
   try {
-    const headers = await authStore.getAuthHeaders()
+    const headers = await getAdminHeaders()
     await $fetch('/api/admin/forum/categories', {
       method: 'DELETE',
       headers,
       body: { id }
     })
     toast.success('Category deleted')
-    void loadCategories()
+    await refreshCategories()
   } catch (err) {
     toast.error('Failed to delete category')
   }
 }
-
-onMounted(() => {
-  loadCategories()
-})
 
 useHead({ title: 'Forum Categories | Admin' })
 </script>

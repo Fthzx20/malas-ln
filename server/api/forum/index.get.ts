@@ -4,19 +4,18 @@ import { sql } from 'drizzle-orm'
 export default defineCachedEventHandler(async () => {
   const db = useDB()
 
-  // Get all categories with post counts in a SINGLE aggregation query
-  const categories = await db.query.forumCategories.findMany({
-    orderBy: (c, { asc }) => [asc(c.sortOrder)],
-  })
-
-  // Batch-fetch all category post counts in one query instead of N+1
-  const postCounts = await db
-    .select({
-      categoryId: forumPosts.categoryId,
-      count: sql<number>`count(*)`,
-    })
-    .from(forumPosts)
-    .groupBy(forumPosts.categoryId)
+  const [categories, postCounts] = await Promise.all([
+    db.query.forumCategories.findMany({
+      orderBy: (c, { asc }) => [asc(c.sortOrder)],
+    }),
+    db
+      .select({
+        categoryId: forumPosts.categoryId,
+        count: sql<number>`count(*)`,
+      })
+      .from(forumPosts)
+      .groupBy(forumPosts.categoryId),
+  ])
 
   const countMap = new Map(postCounts.map(pc => [pc.categoryId, Number(pc.count)]))
 

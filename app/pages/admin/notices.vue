@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { clientLogger } from '~/utils/client-logger'
 
 definePageMeta({
@@ -41,22 +41,38 @@ const openPreview = () => {
   }, 10000)
 }
 
-const loadNotice = async () => {
-  isLoading.value = true
-  try {
-    const data = await $fetch<{ notice: { message: string; isActive: boolean; updatedAt?: string } | null }>('/api/admin/notices', {
-      credentials: 'include',
-    })
-    message.value = data.notice?.message || ''
-    isActive.value = Boolean(data.notice?.isActive)
-    savedAt.value = data.notice?.updatedAt || null
-  } catch (error) {
+const {
+  data: noticeData,
+  pending: noticePending,
+  refresh: refreshNotice,
+  error: noticeError,
+} = await useAsyncData(
+  'admin-homepage-notice',
+  () => $fetch<{ notice: { message: string; isActive: boolean; updatedAt?: string } | null }>('/api/admin/notices', {
+    credentials: 'include',
+  }),
+  {
+    default: () => ({ notice: null }),
+    lazy: false,
+  },
+)
+
+watch(noticePending, (pending) => {
+  isLoading.value = pending
+}, { immediate: true })
+
+watch(noticeData, (data) => {
+  message.value = data?.notice?.message || ''
+  isActive.value = Boolean(data?.notice?.isActive)
+  savedAt.value = data?.notice?.updatedAt || null
+}, { immediate: true })
+
+watch(noticeError, (error) => {
+  if (error) {
     clientLogger.error('Failed loading admin notice', error)
     toastError('Failed to load notice settings')
-  } finally {
-    isLoading.value = false
   }
-}
+})
 
 const saveNotice = async () => {
   isSaving.value = true
@@ -70,6 +86,7 @@ const saveNotice = async () => {
       },
     })
     savedAt.value = data.notice.updatedAt
+    await refreshNotice()
     toastSuccess('Homepage notice updated')
   } catch (error) {
     clientLogger.error('Failed saving admin notice', error)
@@ -78,10 +95,6 @@ const saveNotice = async () => {
     isSaving.value = false
   }
 }
-
-onMounted(() => {
-  void loadNotice()
-})
 
 onUnmounted(() => {
   if (previewTimer) {

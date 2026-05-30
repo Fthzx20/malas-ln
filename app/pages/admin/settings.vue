@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useToast } from '~/composables/useToast'
 
 definePageMeta({
@@ -31,27 +31,41 @@ const settingsForm = reactive<Record<string, Record<string, any>>>({
   system: { enableCache: true, cacheTtl: 3600 },
 })
 
-const isLoading = ref(true)
 const isSaving = ref(false)
 
-const loadSettings = async () => {
-  isLoading.value = true
-  try {
-    const data = await $fetch<{ settings: Record<string, Record<string, any>> }>('/api/admin/settings')
-    if (data?.settings) {
-      for (const cat in data.settings) {
-        if (!settingsForm[cat]) settingsForm[cat] = {}
-        for (const key in data.settings[cat]) {
-          settingsForm[cat][key] = data.settings[cat][key]
-        }
+const {
+  data: settingsData,
+  pending: isLoading,
+  refresh: refreshSettings,
+  error: settingsError,
+} = await useAsyncData(
+  'admin-settings',
+  () => $fetch<{ settings: Record<string, Record<string, any>> }>('/api/admin/settings'),
+  {
+    default: () => ({ settings: {} }),
+    lazy: false,
+  },
+)
+
+watch(settingsError, (err) => {
+  if (err) {
+    toast.error('Failed to load settings')
+  }
+})
+
+watch(
+  settingsData,
+  (data) => {
+    if (!data?.settings) return
+    for (const cat in data.settings) {
+      if (!settingsForm[cat]) settingsForm[cat] = {}
+      for (const key in data.settings[cat]) {
+        settingsForm[cat][key] = data.settings[cat][key]
       }
     }
-  } catch (err) {
-    toast.error('Failed to load settings')
-  } finally {
-    isLoading.value = false
-  }
-}
+  },
+  { immediate: true },
+)
 
 const saveSettings = async () => {
   isSaving.value = true
@@ -67,6 +81,7 @@ const saveSettings = async () => {
       method: 'PUT',
       body: { updates }
     })
+    await refreshSettings()
     
     toast.success('Settings saved successfully')
   } catch (err) {
@@ -75,10 +90,6 @@ const saveSettings = async () => {
     isSaving.value = false
   }
 }
-
-onMounted(() => {
-  loadSettings()
-})
 
 useHead({ title: 'Site Settings | Admin' })
 </script>
@@ -120,7 +131,7 @@ useHead({ title: 'Site Settings | Admin' })
       </nav>
 
       <!-- CONTENT -->
-      <main class="lg:col-span-3 border border-rule bg-surface p-6 min-h-[400px]">
+      <main class="lg:col-span-3 border border-rule bg-surface p-6 min-h-100">
         
         <!-- GENERAL -->
         <div v-if="activeTab === 'general'" class="space-y-6">

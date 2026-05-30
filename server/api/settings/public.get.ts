@@ -1,19 +1,26 @@
 import { siteSettings } from '@@/server/database/schema'
 import { inArray } from 'drizzle-orm'
 
-export default defineEventHandler(async (event) => {
+export default defineCachedEventHandler(async () => {
   const db = useDB()
-  
+
   // Only fetch safe, public categories
   const allowedCategories = ['general', 'homepage', 'pages']
-  const settings = await db.select().from(siteSettings).where(inArray(siteSettings.category, allowedCategories))
-  
+  const settings = await db
+    .select({
+      category: siteSettings.category,
+      key: siteSettings.key,
+      value: siteSettings.value,
+    })
+    .from(siteSettings)
+    .where(inArray(siteSettings.category, allowedCategories))
+
   const groupedSettings: Record<string, Record<string, any>> = {
     general: {},
     homepage: {},
-    pages: {}
+    pages: {},
   }
-  
+
   for (const row of settings) {
     if (!groupedSettings[row.category]) {
       groupedSettings[row.category] = {}
@@ -29,4 +36,8 @@ export default defineEventHandler(async (event) => {
   }
 
   return { settings: groupedSettings }
+}, {
+  maxAge: 120,
+  staleMaxAge: 60,
+  swr: true,
 })

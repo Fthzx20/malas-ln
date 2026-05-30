@@ -2,7 +2,7 @@ import { siteNotice } from '@@/server/database/schema'
 import { withDB } from '@@/server/utils/db'
 import { ensureSiteNoticeTable } from '@@/server/utils/site-notice'
 
-export default defineEventHandler(async () => {
+export default defineCachedEventHandler(async () => {
   return await withDB(async (db) => {
     await ensureSiteNoticeTable(db)
 
@@ -22,4 +22,8 @@ export default defineEventHandler(async () => {
 
     return { notice }
   })
+}, {
+  maxAge: 30,
+  staleMaxAge: 30,
+  swr: true,
 })

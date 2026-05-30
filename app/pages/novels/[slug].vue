@@ -323,73 +323,52 @@ const getRatingPercentage = (rating: number) => {
         <UiTabs v-model="activeTab" :tabs="tabs">
           <template #default="{ activeTab }">
             <!-- CHAPTERS LIST TAB -->
-            <ClientOnly>
-              <div v-if="activeTab === 'chapters'" class="p-4 sm:p-6">
-                <div class="border-b border-ink pb-2 mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between font-mono text-[10px] sm:text-xs uppercase tracking-wider text-ink-muted">
-                  <span>Manuskrip Bab (Chapters)</span>
-                  <span>Word Count &bull; Translator</span>
-                </div>
+            <div v-if="activeTab === 'chapters'" class="p-4 sm:p-6">
+              <div class="border-b border-ink pb-2 mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between font-mono text-[10px] sm:text-xs uppercase tracking-wider text-ink-muted">
+                <span>Manuskrip Bab (Chapters)</span>
+                <span>Word Count &bull; Translator</span>
+              </div>
 
-                <div v-if="novelData.chapters.length > 0" class="divide-y divide-rule">
-                  <div 
-                    v-for="chapter in novelData.chapters" 
-                    :key="chapter.id"
-                    class="py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between hover:bg-surface-raised px-2 transition-colors"
-                  >
-                    <div class="flex items-start gap-3 min-w-0">
-                      <ClientOnly>
-                        <span 
-                          class="w-5 h-5 flex items-center justify-center border font-mono text-[10px] font-black"
-                          :class="libraryStore.isChapterRead(chapter.id) ? 'bg-success text-white border-success' : 'border-rule text-ink-faint'"
-                          title="Read status indicator"
-                        >
-                          ✓
-                        </span>
-                        <template #fallback>
-                          <span 
-                            class="w-5 h-5 flex items-center justify-center border font-mono text-[10px] font-black border-rule text-ink-faint"
-                            title="Read status indicator"
-                          >
-                            ✓
-                          </span>
-                        </template>
-                      </ClientOnly>
+              <div v-if="novelData.chapters.length > 0" class="divide-y divide-rule">
+                <div 
+                  v-for="chapter in novelData.chapters" 
+                  :key="chapter.id"
+                  class="py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between hover:bg-surface-raised px-2 transition-colors"
+                >
+                  <div class="flex items-start gap-3 min-w-0">
+                    <span 
+                      class="w-5 h-5 flex items-center justify-center border font-mono text-[10px] font-black"
+                      :class="libraryStore.isChapterRead(chapter.id) ? 'bg-success text-white border-success' : 'border-rule text-ink-faint'"
+                      title="Read status indicator"
+                    >
+                      ✓
+                    </span>
 
-                      <NuxtLink 
-                        :to="`/read/${chapter.id}`" 
-                        class="font-heading text-sm sm:text-base font-bold hover:text-accent transition-colors wrap-break-word leading-tight"
-                      >
-                        Chapter {{ chapter.chapterNumber }}: {{ chapter.title }}
-                      </NuxtLink>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-3 sm:gap-6 font-mono text-[10px] sm:text-xs text-ink-muted">
-                      <span class="hidden sm:inline">{{ chapter.wordCount }} words</span>
-                      <span class="italic font-medium">{{ chapter.translatorGroup || 'Malaz Scans' }}</span>
-                      <NuxtLink 
-                        :to="`/read/${chapter.id}`"
-                        class="px-2 py-0.5 border border-ink hover:bg-ink hover:text-paper text-[10px] uppercase font-bold"
-                      >
-                        Read
-                      </NuxtLink>
-                    </div>
+                    <NuxtLink 
+                      :to="`/read/${chapter.id}`" 
+                      class="font-heading text-sm sm:text-base font-bold hover:text-accent transition-colors wrap-break-word leading-tight"
+                    >
+                      Chapter {{ chapter.chapterNumber }}: {{ chapter.title }}
+                    </NuxtLink>
                   </div>
-                </div>
 
-                <div v-else class="text-center py-8 text-ink-muted font-mono text-sm">
-                  No chapters published yet. Stay tuned for translations!
+                  <div class="flex flex-wrap items-center gap-3 sm:gap-6 font-mono text-[10px] sm:text-xs text-ink-muted">
+                    <span class="hidden sm:inline">{{ chapter.wordCount }} words</span>
+                    <span class="italic font-medium">{{ chapter.translatorGroup || 'Malaz Scans' }}</span>
+                    <NuxtLink 
+                      :to="`/read/${chapter.id}`"
+                      class="px-2 py-0.5 border border-ink hover:bg-ink hover:text-paper text-[10px] uppercase font-bold"
+                    >
+                      Read
+                    </NuxtLink>
+                  </div>
                 </div>
               </div>
 
-              <template #fallback>
-                <div class="p-4 sm:p-6">
-                  <UiSkeleton class="h-6 w-44 mb-4" />
-                  <div class="space-y-3">
-                    <UiSkeleton v-for="item in 3" :key="item" class="h-14 w-full" />
-                  </div>
-                </div>
-              </template>
-            </ClientOnly>
+              <div v-else class="text-center py-8 text-ink-muted font-mono text-sm">
+                No chapters published yet. Stay tuned for translations!
+              </div>
+            </div>
 
             <!-- VOLUMES LIST TAB -->
             <div v-if="activeTab === 'volumes'" class="p-4 sm:p-6">

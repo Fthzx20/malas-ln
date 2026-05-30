@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { validateUUID } from '@@/server/utils/validate'
 import { withDB } from '@@/server/utils/db'
 import { throwApiError } from '@@/server/utils/errors'
+import { invalidateAdminCachePrefix } from '@@/server/utils/admin-cache'
 
 const ALLOWED_STATUSES = ['reviewed', 'dismissed'] as const
 
@@ -42,6 +43,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(reports.id, id))
       .returning()
 
+    invalidateAdminCachePrefix('admin:reports:')
     return updated
   })
 })

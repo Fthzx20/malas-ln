@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, defineAsyncComponent } from 'vue'
+import { ref, computed, watch, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useToast } from '~/composables/useToast'
 import { useAuthStore } from '~/stores/auth'
 
@@ -11,10 +11,12 @@ definePageMeta({
 const toast = useToast()
 const authStore = useAuthStore()
 
+const searchInput = ref('')
 const searchQuery = ref('')
 const selectedRole = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 20
+let searchDebounce: ReturnType<typeof setTimeout> | null = null
 
 // Roles for filter dropdown
 const roles = [
@@ -92,9 +94,24 @@ const getRoleColor = (role: string) => {
   return 'text-ink-light'
 }
 
+watch(searchInput, (value) => {
+  if (searchDebounce) clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => {
+    searchQuery.value = value.trim()
+    searchDebounce = null
+  }, 220)
+})
+
 // Reset page when queries change
 watch([searchQuery, selectedRole], () => {
   currentPage.value = 1
+})
+
+onBeforeUnmount(() => {
+  if (searchDebounce) {
+    clearTimeout(searchDebounce)
+    searchDebounce = null
+  }
 })
 
 useHead({
@@ -124,7 +141,7 @@ useHead({
             class="w-full sm:w-44"
           />
           <UiInput
-            v-model="searchQuery"
+            v-model="searchInput"
             type="search"
             placeholder="Search by name, username..."
             class="w-full sm:w-72"

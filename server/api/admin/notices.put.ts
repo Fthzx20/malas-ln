@@ -2,6 +2,7 @@ import { siteNotice } from '@@/server/database/schema'
 import { withDB } from '@@/server/utils/db'
 import { throwApiError } from '@@/server/utils/errors'
 import { ensureSiteNoticeTable } from '@@/server/utils/site-notice'
+import { invalidateAdminCachePrefix } from '@@/server/utils/admin-cache'
 
 export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
@@ -35,9 +36,12 @@ export default defineEventHandler(async (event) => {
       })
       .returning()
 
-    return {
+    const response = {
       success: true,
       notice: saved,
     }
+
+    invalidateAdminCachePrefix('admin:notices:')
+    return response
   })
 })

@@ -10,10 +10,13 @@ useHead({
 })
 
 // Fetch featured novels for the auto-flip page-turner without blocking first paint
-const { data: featuredNovels } = useFetch('/api/novels/featured')
+const { data: featuredNovels, pending: featuredPending } = useFetch('/api/novels/featured', { lazy: true })
 
-// Fetch public settings for homepage texts
-const { data: publicSettingsRaw } = useFetch('/api/settings/public')
+// Fetch public settings without blocking the initial render
+const { data: publicSettingsRaw } = useFetch('/api/settings/public', {
+  lazy: true,
+  server: false,
+})
 const siteSettings = computed(() => (publicSettingsRaw.value as any)?.settings)
 const hpSettings = computed(() => siteSettings.value?.homepage || {})
 
@@ -28,16 +31,22 @@ useHead(computed(() => ({
 })))
 
 // Fetch latest releases (latest novels/chapters)
-const { data: latestNovels, refresh: refreshLatest } = useFetch('/api/novels', {
+const { data: latestNovels, pending: latestPending } = useFetch('/api/novels', {
   query: { sort: 'latest', limit: 8 },
+  lazy: true,
 })
 
 // Fetch trending novels
-const { data: trendingNovels, refresh: refreshTrending } = useFetch('/api/novels', {
+const { data: trendingNovels, pending: trendingPending } = useFetch('/api/novels', {
   query: { sort: 'popular', limit: 5 },
+  lazy: true,
 })
 
-const { data: topContribData, refresh: refreshTopContrib } = useFetch('/api/profiles/top-contributor')
+const { data: topContribData, pending: topContribPending } = useFetch('/api/profiles/top-contributor', {
+  lazy: true,
+  server: false,
+  default: () => ({ contributors: [] }),
+})
 
 const sidebarRef = ref<HTMLElement | null>(null)
 
@@ -355,7 +364,22 @@ const genres = computed(() => {
             </NuxtLink>
           </div>
 
-          <div v-if="latestNovels?.data?.length" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-if="latestPending" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div v-for="i in 4" :key="i" class="border border-rule p-4 space-y-4">
+              <div class="flex gap-4">
+                <UiSkeleton class="w-20 h-28" />
+                <div class="flex-1 space-y-2">
+                  <UiSkeleton class="h-3 w-16" />
+                  <UiSkeleton class="h-5 w-full" />
+                  <UiSkeleton class="h-5 w-4/5" />
+                  <UiSkeleton class="h-3 w-24" />
+                </div>
+              </div>
+              <UiSkeleton class="h-6 w-full" />
+            </div>
+          </div>
+          
+          <div v-else-if="latestNovels?.data?.length" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div 
               v-for="novel in latestNovels?.data" 
               :key="novel.id"
@@ -421,21 +445,7 @@ const genres = computed(() => {
             </div>
           </div>
 
-          <!-- Empty Fallback / Loader Skeletons -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div v-for="i in 4" :key="i" class="border border-rule p-4 space-y-4">
-              <div class="flex gap-4">
-                <UiSkeleton class="w-20 h-28" />
-                <div class="flex-1 space-y-2">
-                  <UiSkeleton class="h-3 w-16" />
-                  <UiSkeleton class="h-5 w-full" />
-                  <UiSkeleton class="h-5 w-4/5" />
-                  <UiSkeleton class="h-3 w-24" />
-                </div>
-              </div>
-              <UiSkeleton class="h-6 w-full" />
-            </div>
-          </div>
+          <!-- Empty Fallback / Loader Skeletons (now above in v-if) -->
         </div>
 
         <!-- ===== GENRE TAXONOMY GRID ===== -->
@@ -495,7 +505,17 @@ const genres = computed(() => {
             <span class="font-mono text-[9px] text-ink-muted tracking-[0.2em] uppercase">Metrics Engine</span>
           </div>
 
-          <div v-if="trendingNovels?.data?.length" class="space-y-6">
+          <div v-if="trendingPending" class="space-y-4">
+            <div v-for="i in 5" :key="i" class="flex gap-4 border-b border-rule pb-4">
+              <UiSkeleton class="h-10 w-8" />
+              <div class="flex-1 space-y-2">
+                <UiSkeleton class="h-4 w-full" />
+                <UiSkeleton class="h-3 w-2/3" />
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="trendingNovels?.data?.length" class="space-y-6">
             <div 
               v-for="(novel, index) in trendingNovels?.data" 
               :key="novel.id"
@@ -520,16 +540,7 @@ const genres = computed(() => {
             </div>
           </div>
 
-          <!-- Loading skeleton -->
-          <div v-else class="space-y-4">
-            <div v-for="i in 5" :key="i" class="flex gap-4 border-b border-rule pb-4">
-              <UiSkeleton class="h-10 w-8" />
-              <div class="flex-1 space-y-2">
-                <UiSkeleton class="h-4 w-full" />
-                <UiSkeleton class="h-3 w-2/3" />
-              </div>
-            </div>
-          </div>
+          <!-- Loading skeleton (now above in v-if) -->
         </div>
 
         <!-- Dynamic Statistics Desk -->
@@ -542,7 +553,17 @@ const genres = computed(() => {
             <span class="shrink-0 rounded-none border border-ink px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-ink font-bold bg-paper">Top 5</span>
           </div>
 
-          <div v-if="contributorsList.length" class="space-y-3">
+          <div v-if="topContribPending" class="space-y-3">
+            <div v-for="i in 3" :key="i" class="flex items-center gap-3 rounded-none border border-rule bg-paper p-2.5 sm:p-3">
+              <UiSkeleton class="h-10 w-10 rounded-full shrink-0" />
+              <div class="min-w-0 flex-1 space-y-2">
+                <UiSkeleton class="h-4 w-2/3" />
+                <UiSkeleton class="h-3 w-1/2" />
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="contributorsList.length" class="space-y-3">
             <div
               v-for="(contributor, index) in contributorsList"
               :key="contributor.id"

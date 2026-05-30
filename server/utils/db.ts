@@ -15,7 +15,7 @@ export function useDB(): PostgresJsDatabase<typeof schema> {
     logger.info('[db] creating postgres client')
     _client = postgres(config.databaseUrl, {
       prepare: false,       // Required for Supabase Transaction Pooler
-      max: 3,               // Stay within free-tier connection limits
+      max: 20,              // Increased to handle concurrent Nuxt SSR requests
       connect_timeout: 10,  // Fail faster on new connection attempts (seconds)
       idle_timeout: 20,     // Seconds before closing idle connections
     })

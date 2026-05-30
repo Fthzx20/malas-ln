@@ -60,7 +60,8 @@ export default defineEventHandler(async (event) => {
     if (previousAvatarUrl && nextAvatarUrl && previousAvatarUrl !== nextAvatarUrl) {
       const previousKey = getR2KeyFromPublicUrl(previousAvatarUrl)
       if (previousKey) {
-        await deleteFromR2(previousKey).catch(() => {})
+        // Do not block profile updates on storage cleanup.
+        void deleteFromR2(previousKey).catch(() => {})
       }
     }
 

@@ -2,11 +2,18 @@ import { siteNotice } from '@@/server/database/schema'
 import { withDB } from '@@/server/utils/db'
 import { ensureSiteNoticeTable } from '@@/server/utils/site-notice'
 import { throwApiError } from '@@/server/utils/errors'
+import { getAdminCache, setAdminCache } from '@@/server/utils/admin-cache'
 
 export default defineEventHandler(async (event) => {
   await requireRole(event, 'admin')
+  const cacheKey = 'admin:notices:homepage-popup:v1'
 
-  return await withDB(async (db) => {
+  const cached = getAdminCache<{ notice: any }>(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const response = await withDB(async (db) => {
     await ensureSiteNoticeTable(db)
 
     const existing = await db.query.siteNotice.findFirst({
@@ -29,4 +36,7 @@ export default defineEventHandler(async (event) => {
 
     return { notice: created }
   })
+
+  setAdminCache(cacheKey, response, 15000)
+  return response
 })

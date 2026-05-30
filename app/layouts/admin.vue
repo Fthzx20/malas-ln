@@ -88,7 +88,7 @@ watch(() => route.fullPath, closeSidebar)
         <div class="flex h-full flex-col overflow-hidden">
           <!-- Sidebar header / branding -->
           <div class="border-b border-rule px-5 py-5 shrink-0">
-            <NuxtLink to="/" class="block space-y-0.5 group" @click="closeSidebar">
+            <NuxtLink prefetch to="/" class="block space-y-0.5 group" @click="closeSidebar">
               <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-muted">Admin platform</p>
               <h1 class="font-heading text-2xl font-black leading-none tracking-tight group-hover:text-accent transition-colors">
                 MALAZ<span class="text-accent group-hover:text-ink transition-colors">LN</span>
@@ -109,6 +109,7 @@ watch(() => route.fullPath, closeSidebar)
                 <li v-for="link in section.links" :key="link.to">
                   <NuxtLink
                     :to="link.to"
+                    prefetch
                     class="group flex items-center justify-between gap-3 border px-3 py-2.5 font-ui text-sm font-medium transition-all"
                     :class="isLinkActive(link)
                       ? 'border-ink bg-ink text-paper shadow-sm'
@@ -137,6 +138,7 @@ watch(() => route.fullPath, closeSidebar)
                   v-for="link in quickLinks"
                   :key="link.to"
                   :to="link.to"
+                  prefetch
                   class="flex items-center justify-between border border-rule px-3 py-2 text-sm font-ui transition-colors hover:border-ink hover:bg-paper"
                   @click="closeSidebar"
                 >
@@ -157,6 +159,7 @@ watch(() => route.fullPath, closeSidebar)
               </div>
               <NuxtLink
                 to="/profile"
+                prefetch
                 class="shrink-0 p-1.5 text-ink-muted hover:text-accent transition-colors"
                 title="Profile settings"
                 @click="closeSidebar"
@@ -191,7 +194,7 @@ watch(() => route.fullPath, closeSidebar)
             <!-- Page title -->
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 text-xs font-mono text-ink-muted uppercase tracking-[0.22em]">
-                <NuxtLink to="/admin" class="hover:text-accent transition-colors">Admin</NuxtLink>
+                <NuxtLink prefetch to="/admin" class="hover:text-accent transition-colors">Admin</NuxtLink>
                 <span v-if="activePath !== '/admin'" class="text-ink-faint">/</span>
                 <span v-if="activePath !== '/admin'" class="text-ink">{{ pageTitle }}</span>
               </div>
@@ -201,6 +204,7 @@ watch(() => route.fullPath, closeSidebar)
             <div class="flex items-center gap-2">
               <NuxtLink
                 to="/"
+                prefetch
                 class="hidden sm:inline-flex items-center border border-ink px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] transition-colors hover:bg-ink hover:text-paper"
               >
                 ← Back to Site

@@ -2,7 +2,7 @@ import { forumPosts, forumCategories } from '@@/server/database/schema'
 import { throwApiError } from '@@/server/utils/errors'
 import { eq, desc, sql } from 'drizzle-orm'
 
-export default defineEventHandler(async (event) => {
+export default defineCachedEventHandler(async (event) => {
   const categorySlug = getRouterParam(event, 'category')
   const db = useDB()
   const query = getQuery(event)
@@ -36,4 +36,14 @@ export default defineEventHandler(async (event) => {
   })
 
   return { category, posts }
+}, {
+  maxAge: 45,
+  staleMaxAge: 30,
+  swr: true,
+  getKey: (event) => {
+    const query = getQuery(event)
+    const categorySlug = getRouterParam(event, 'category') || 'unknown'
+    const page = Math.max(1, parseInt(query.page as string) || 1)
+    return `forum:category:${categorySlug}:page:${page}`
+  },
 })

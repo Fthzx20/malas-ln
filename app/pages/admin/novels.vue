@@ -15,7 +15,6 @@ const searchQuery = ref('')
 // Fetch all novels (non-blocking)
 const { data: novelsData, pending, refresh } = useFetch('/api/novels', {
   query: { limit: 100 },
-  lazy: true,
 })
 
 const filteredNovels = computed(() => {

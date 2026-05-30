@@ -9,7 +9,6 @@ definePageMeta({
 // Fetch all novels to choose from (non-blocking)
 const { data: novelsData } = useFetch('/api/novels', {
   query: { limit: 100 },
-  lazy: true,
 })
 
 const selectedNovelId = ref('')

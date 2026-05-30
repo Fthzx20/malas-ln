@@ -8,7 +8,6 @@ definePageMeta({
 
 const { data: analyticsData, pending: analyticsPending, refresh } = useFetch('/api/admin/analytics', {
   credentials: 'include',
-  lazy: true,
 })
 
 const overviewStats = computed(() => {
@@ -51,7 +50,7 @@ useHead({
         </div>
 
         <div class="flex flex-wrap gap-2 shrink-0">
-          <NuxtLink to="/admin/moderation" class="inline-flex items-center border border-rule px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors hover:border-ink hover:bg-surface-raised">
+          <NuxtLink prefetch to="/admin/moderation" class="inline-flex items-center border border-rule px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors hover:border-ink hover:bg-surface-raised">
             Review reports
           </NuxtLink>
         </div>
@@ -85,6 +84,7 @@ useHead({
           v-for="action in quickActions"
           :key="action.to"
           :to="action.to"
+          prefetch
           class="group flex flex-col sm:flex-row items-start sm:items-center gap-3 border border-rule bg-paper p-4 transition-all hover:border-accent hover:shadow-sm"
         >
           <span class="text-2xl filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all shrink-0">{{ action.icon }}</span>
@@ -106,7 +106,7 @@ useHead({
               <h3 class="font-heading text-lg font-black uppercase tracking-tight">Recent Chapters</h3>
               <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Latest chapters added</p>
             </div>
-            <NuxtLink to="/admin/chapters" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
+            <NuxtLink prefetch to="/admin/chapters" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
               Open chapters →
             </NuxtLink>
           </div>
@@ -146,7 +146,7 @@ useHead({
               <h3 class="font-heading text-lg font-black uppercase tracking-tight">Reports</h3>
               <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-ink-muted mt-0.5">Pending items for review</p>
             </div>
-            <NuxtLink to="/admin/moderation" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
+            <NuxtLink prefetch to="/admin/moderation" class="font-mono text-[10px] uppercase tracking-[0.24em] text-accent hover:underline whitespace-nowrap">
               Full list →
             </NuxtLink>
           </div>
@@ -174,7 +174,7 @@ useHead({
                     <td class="p-2.5 text-ink-light">{{ report.reason }}</td>
                     <td class="max-w-45 p-2.5 truncate text-ink-muted" :title="report.description || ''">{{ report.description || '—' }}</td>
                     <td class="p-2.5 text-right">
-                      <NuxtLink to="/admin/moderation" class="px-2 py-1 border border-ink bg-ink text-paper text-[8px] uppercase tracking-wider font-bold hover:bg-accent hover:border-accent">Triage</NuxtLink>
+                      <NuxtLink prefetch to="/admin/moderation" class="px-2 py-1 border border-ink bg-ink text-paper text-[8px] uppercase tracking-wider font-bold hover:bg-accent hover:border-accent">Triage</NuxtLink>
                     </td>
                   </tr>
                 </tbody>
@@ -215,7 +215,7 @@ useHead({
                   <NuxtImg v-if="item.novel?.coverUrl" :src="item.novel.coverUrl" width="36" height="48" class="h-full w-full object-cover" loading="lazy" />
                 </div>
                 <div class="min-w-0 flex-1">
-                  <NuxtLink :to="`/novels/${item.novel?.slug}`" class="hover:text-accent transition-colors">
+                  <NuxtLink prefetch :to="`/novels/${item.novel?.slug}`" class="hover:text-accent transition-colors">
                     <p class="truncate font-heading text-sm font-bold">{{ item.novel?.title || 'Unknown Novel' }}</p>
                   </NuxtLink>
                   <p class="truncate font-mono text-[9px] uppercase tracking-[0.18em] text-ink-muted">By {{ item.novel?.author }} &bull; {{ item.count }} bookmarks</p>
